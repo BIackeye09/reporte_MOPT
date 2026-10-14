@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="es-CR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#123a60">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Reporte MOPT">
+  <meta name="description" content="Reporte diario de actividad con encabezado, personal, equipos y materiales de la macro región V.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icono-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icono-180.png">
+  <link rel="stylesheet" href="estilos.css">
+  <title>Reporte diario MOPT</title>
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+  <header class="cabecera">
+    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.7.2</span></p></div></div>
+    <button id="instalar" type="button" class="claro" hidden>Instalar aplicación</button>
+  </header>
+  <main>
+    <div class="estado"><p id="estado" role="status">Cargando catálogos y plantilla…</p><span id="conexion"></span></div>
+    <p id="fallo" role="alert" hidden></p>
+    <noscript>Activa JavaScript para utilizar el reporte.</noscript>
+    <form id="formulario" novalidate>
+      <section class="tarjeta"><div class="titulo"><span>01</span><h2>Datos del reporte</h2></div>
+        <div class="rejilla">
+          <div><label for="numero">Número de reporte</label><input id="numero" type="text" inputmode="text" autocomplete="off" placeholder="Ej. 1 / 2" aria-describedby="nota-numero error-numero"><small id="nota-numero">Opcional. Dos números enteros separados por /.</small><p class="error" id="error-numero" role="alert"></p></div>
+          <label>Macro región<input readonly value="V"></label>
+          <!-- La fecha se puede escribir y el botón abre un calendario visible. -->
+          <div><label for="fecha">Fecha</label><div class="fecha-fila"><input id="fecha" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="DD/MM/AAAA" aria-describedby="nota-fecha error-fecha"><button id="calendario" type="button" class="secundario" aria-haspopup="dialog">Calendario</button></div><small id="nota-fecha">Escribe DD/MM/AAAA o elige un día en el calendario.</small><p class="error" id="error-fecha"></p><button id="hoy" type="button" class="enlace">Usar fecha del dispositivo</button></div>
+          <label>Boleta<input readonly value=""><small>Se deja vacía.</small></label>
+        </div>
+      </section>
+      <section class="tarjeta"><div class="titulo"><span>02</span><h2>Camino</h2></div>
+        <label for="camino">N/C (A) · Código del camino</label>
+        <input id="camino" type="search" autocomplete="off" placeholder="Ej. 4-0771-00 o El Achiote" aria-describedby="error-camino" aria-controls="lista-camino" aria-expanded="false">
+        <div id="lista-camino" class="opciones" role="listbox" aria-label="Caminos encontrados" hidden></div><p class="error" id="error-camino"></p>
+        <div class="rejilla"><div class="automatico"><span>DE</span><p id="desde">Selecciona un camino</p></div><div class="automatico"><span>A</span><p id="hasta">Selecciona un camino</p></div></div>
+      </section>
+      <section class="tarjeta"><div class="titulo"><span>03</span><h2>Actividad y producción</h2></div>
+        <label for="actividad">ACTIVIDAD (D) · Código de actividad</label>
+        <input id="actividad" type="search" autocomplete="off" placeholder="Ej. 280 o Relleno" aria-describedby="error-actividad" aria-controls="lista-actividad" aria-expanded="false">
+        <div id="lista-actividad" class="opciones" role="listbox" aria-label="Actividades encontradas" hidden></div><p class="error" id="error-actividad"></p>
+        <div class="automatico"><span>Descripción</span><p id="descripcion">Selecciona una actividad</p></div>
+        <label for="produccion">Producción</label><div class="cantidad"><input id="produccion" inputmode="decimal" placeholder="" disabled aria-describedby="ayuda-produccion error-produccion"><output id="unidad" aria-live="polite">—</output></div><p class="error" id="error-produccion"></p>
+        <small id="ayuda-produccion">La unidad se completa con la actividad. La cantidad se escribe manualmente y puede quedar vacía.</small>
+      </section>
+      <section class="tarjeta"><div class="titulo"><span>04</span><h2>Datos manuales</h2></div>
+        <p class="ayuda">Estos campos comienzan vacíos y pueden dejarse así.</p>
+        <label for="senas">Señas de inicio</label><textarea id="senas" rows="2" maxlength="2000"></textarea>
+        <div class="rejilla"><div><label for="avance">Longitud de avance de actividad (km)</label><input id="avance" inputmode="decimal" placeholder="" aria-describedby="error-avance"><p class="error" id="error-avance"></p><small>Corresponde al avance del día. Es opcional.</small></div><div><label for="problema">Problema S/N</label><select id="problema" aria-describedby="error-problema"><option value="">Sin completar</option><option value="S">S · Sí</option><option value="N">N · No</option></select><p class="error" id="error-problema"></p><small>Opcional; también puede completarse después de imprimir.</small></div></div>
+      </section>
+      <!-- Los trabajadores y las máquinas tienen búsquedas y listas independientes. -->
+      <section class="tarjeta"><div class="titulo"><span>05</span><h2>Personal</h2></div>
+        <p class="ayuda">Escribe el nombre, la cédula o el código y elige una coincidencia. Sus datos se agregan al reporte y se incluyen al descargar el Excel. PART (C) es 000 para el MOPT.</p>
+        <label for="regional-personal">Regional del trabajador</label><select id="regional-personal"><option value="">Todas las regionales</option></select>
+        <label for="personal">Buscar por nombre, cédula o código</label><input id="personal" type="search" autocomplete="off" placeholder="Nombre, cédula o código del trabajador" role="combobox" aria-autocomplete="list" aria-controls="lista-personal" aria-expanded="false" aria-describedby="coincidencias-personal error-personal">
+        <p id="coincidencias-personal" class="ayuda resultados" role="status"></p><div id="lista-personal" class="opciones" role="listbox" aria-label="Trabajadores encontrados" hidden></div><button id="mas-personal" type="button" class="enlace" hidden>Mostrar más coincidencias</button>
+        <div id="ficha-personal" class="ficha" hidden><h3>Trabajador seleccionado</h3><div class="rejilla"><label>Nombre<input id="nombre-personal" readonly></label><label>Cédula<input id="cedula-personal" readonly></label><label>Código del trabajador (D)<input id="codigo-personal" readonly></label><label>PART (C)<input id="part-personal" readonly></label></div><p id="origen-personal" class="ayuda resultados"></p></div>
+        <p id="error-personal" class="error" role="alert"></p>
+        <div class="titulo-lista"><h3>Personal del reporte</h3><span id="cantidad-personal">0 de 10</span></div><small>Hay diez espacios para trabajadores y una fila de cierre con Última línea.</small><div id="personal-reporte" class="registros"></div>
+      </section>
+      <section class="tarjeta"><div class="titulo"><span>06</span><h2>Equipo</h2></div>
+        <p class="ayuda">Escribe el código, N.º EQ o la descripción y elige una coincidencia. El equipo se agrega al reporte y se incluye al descargar el Excel, en su propia tabla.</p>
+        <label for="regional-equipos">Regional del equipo</label><select id="regional-equipos"><option value="">Todas las regionales</option></select>
+        <label for="equipos">Buscar equipo por código, N.º EQ o descripción</label><input id="equipos" type="search" autocomplete="off" placeholder="Código, número de equipo o descripción" role="combobox" aria-autocomplete="list" aria-controls="lista-equipos" aria-expanded="false" aria-describedby="coincidencias-equipos error-equipos">
+        <p id="coincidencias-equipos" class="ayuda resultados" role="status"></p><div id="lista-equipos" class="opciones" role="listbox" aria-label="Equipos encontrados" hidden></div><button id="mas-equipos" type="button" class="enlace" hidden>Mostrar más coincidencias</button>
+        <div id="ficha-equipos" class="ficha" hidden><h3>Equipo seleccionado</h3><div class="rejilla"><label>Descripción<input id="descripcion-equipos" readonly></label><label>COD. (F)<input id="codigo-equipos" readonly></label><label>N.º EQ<input id="numero-equipos" readonly></label><label>Identificador del equipo<input id="identificador-equipos" readonly></label><label>PART (C)<input id="part-equipos" readonly></label></div><p id="origen-equipos" class="ayuda resultados"></p><div id="advertencias-equipos"></div></div>
+        <p id="error-equipos" class="error" role="alert"></p>
+        <div class="titulo-lista"><h3>Equipos del reporte</h3><span id="cantidad-equipos">0 de 10</span></div><small>PART (C) es 000 para el MOPT. En la actividad 533 se toma el participante indicado en el acarreo.</small><small>Hay diez espacios para equipos y una fila de cierre con Última línea. Completa H.T. y TRAS. debajo de cada equipo.</small><div id="equipos-reporte" class="registros"></div>
+      </section>
+      <section class="tarjeta" id="acarreos" tabindex="-1" hidden aria-labelledby="titulo-acarreos" aria-describedby="error-acarreos">
+        <div class="titulo"><span>533</span><h2 id="titulo-acarreos">Acarreo de material</h2></div>
+        <p class="ayuda">Completa el reverso con los equipos del frente. Marca una casilla por cada viaje. Cada subtotal es capacidad × longitud de acarreo × número de viajes marcados.</p>
+        <label for="equipo-acarreo">Equipo que realizó el acarreo</label><div class="agregar-acarreo"><select id="equipo-acarreo" aria-describedby="ayuda-equipo-acarreo"><option value="">Elige un equipo del frente</option></select><button id="agregar-acarreo" type="button" disabled>Agregar al acarreo</button></div>
+        <small id="ayuda-equipo-acarreo">Agrega primero las máquinas en Equipo, arriba.</small>
+        <p id="error-acarreos" class="error" role="alert"></p><div id="acarreos-reporte" class="registros"></div>
+        <div class="produccion-acarreos"><label for="total-acarreos">Producción total · M³/KM</label><output id="total-acarreos" aria-live="polite">Sin completar</output><small id="nota-produccion-acarreos">Este total se coloca automáticamente en Producción, al frente.</small></div>
+      </section>
+      <!-- La cantidad se edita en cada material y permanece vacía al seleccionarlo. -->
+      <section class="tarjeta" id="seccion-materiales"><div class="titulo"><span>07</span><h2>Materiales</h2></div>
+        <p class="ayuda">Busca por código o descripción y elige una coincidencia. PART (C) es 000; el código, la descripción y la unidad se completan con el catálogo.</p>
+        <label for="materiales">Buscar material por CÓDIGO (H) o descripción</label><input id="materiales" type="search" autocomplete="off" placeholder="Código o descripción del material" role="combobox" aria-autocomplete="list" aria-controls="lista-materiales" aria-expanded="false" aria-describedby="coincidencias-materiales error-materiales">
+        <p id="coincidencias-materiales" class="ayuda resultados" role="status"></p><div id="lista-materiales" class="opciones" role="listbox" aria-label="Materiales encontrados" hidden></div><button id="mas-materiales" type="button" class="enlace" hidden>Mostrar más coincidencias</button>
+        <p id="error-materiales" class="error" role="alert"></p>
+        <div class="titulo-lista"><h3>Materiales del reporte</h3><span id="cantidad-materiales">0 de 8</span></div><div id="materiales-reporte" class="registros"></div>
+      </section>
+      <section class="tarjeta" id="seccion-observaciones"><div class="titulo"><span>08</span><h2>Observaciones</h2></div>
+        <label for="observaciones">Observaciones del reporte</label><textarea id="observaciones" rows="3" aria-describedby="ayuda-observaciones espacio-observaciones error-observaciones"></textarea>
+        <small id="ayuda-observaciones">Opcional. Se imprime en las tres líneas de observaciones del reporte. Puedes usar saltos de línea.</small>
+        <p id="espacio-observaciones" class="resultados" role="status">0 de 3 líneas disponibles.</p><p id="error-observaciones" class="error" role="alert"></p>
+      </section>
+      <section class="tarjeta"><div class="titulo"><span>09</span><h2>Guardar y exportar</h2></div>
+        <p class="ayuda">Se exportan el encabezado, el personal, los equipos, sus horas, los materiales y las observaciones. El reporte siempre incluye el frente y el reverso. Las horas se completan debajo de cada perfil. Para la actividad 533, los acarreos completan el reverso y calculan la producción del frente.</p>
+        <div class="acciones"><button id="guardar" type="button" disabled>Guardar borrador</button><button id="ver" type="button" class="secundario" disabled>Vista previa</button><button id="catalogos" type="button" class="secundario" disabled>Consultar catálogos</button><button id="nuevo" type="button" class="enlace" disabled>Nuevo reporte</button></div>
+        <div class="exportaciones"><button id="excel" type="button" disabled>Descargar Excel</button><button id="pdf" type="button" disabled>Descargar PDF</button><button id="imagen" type="button" disabled>Descargar imagen</button></div>
+        <small>El Excel contiene dos hojas y el PDF dos páginas. La imagen reúne el frente y el reverso.</small>
+      </section>
+    </form>
+    <section id="vista" class="tarjeta" hidden><div class="titulo"><span>Hojas</span><h2>Vista previa del reporte</h2></div><canvas id="lienzo" width="2448" height="3168" aria-label="Frente con encabezado, personal, equipos, materiales y observaciones"></canvas><canvas id="reverso" width="2448" height="3168" aria-label="Reverso de acarreos"></canvas></section>
+    <section id="visor" class="tarjeta" hidden><div class="titulo"><span>Datos</span><h2>Consultar catálogos</h2></div><div class="rejilla"><label>Catálogo<select id="tipo-catalogo"><option value="actividades">Actividades</option><option value="personal">Personal</option><option value="materiales">Materiales</option><option value="equipos">Equipos</option><option value="redVial">Red vial nacional</option><option value="puentes">Puentes</option></select></label><label>Buscar<input id="buscar-catalogo" type="search" placeholder="Código, nombre o referencia"></label></div><label>Regional o provincia<select id="region-catalogo"><option value="">Todas</option></select></label><p id="cantidad-catalogo" role="status"></p><div id="resultados-catalogo"></div><button id="mas-catalogo" type="button" class="secundario" hidden>Mostrar más</button></section>
+    <details class="instalacion"><summary>Usar en el teléfono</summary><p>En Android, abre el sitio y usa «Instalar aplicación» en el navegador. En iPhone, abre el sitio en Safari, pulsa Compartir y elige «Añadir a pantalla de inicio».</p><p>Espera a que aparezca «Disponible sin conexión» antes de salir de Internet. Los borradores se guardan en este dispositivo.</p></details>
+    <footer class="pie-legal"><nav aria-label="Documentos de uso y privacidad"><a href="terminos.html">Términos y condiciones de uso</a><a href="privacidad.html">Política de privacidad</a></nav><small>Textos propuestos para revisión institucional. Responsable y contacto pendientes de confirmación.</small></footer>
+  </main>
+  <!-- Calendario propio: el botón funciona también cuando el selector nativo no abre. -->
+  <dialog id="dialogo-calendario" aria-labelledby="titulo-calendario">
+    <div class="titulo-calendario"><h2 id="titulo-calendario">Fecha del reporte</h2><button id="cerrar-calendario" type="button" class="enlace">Cerrar</button></div>
+    <div class="controles-calendario"><button id="mes-anterior" type="button" class="secundario" aria-label="Mes anterior">‹</button><label>Mes<select id="mes-calendario"></select></label><label>Año<select id="ano-calendario"></select></label><button id="mes-siguiente" type="button" class="secundario" aria-label="Mes siguiente">›</button></div>
+    <div class="semana-calendario" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>
+    <div id="dias-calendario" class="dias-calendario" role="group" aria-label="Días del mes"></div><button id="hoy-calendario" type="button" class="enlace">Elegir hoy</button>
+  </dialog>
+</body>
+</html>
