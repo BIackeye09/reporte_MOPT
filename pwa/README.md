@@ -1,4 +1,15 @@
-# Aplicación PWA · Versión 0.10.6
+# Aplicación PWA · Versión 0.11.0
+
+La versión **0.11.0** conserva la producción sin redondearla e incorpora el **Historial de reportes diarios** en este navegador.
+
+- **Producción exacta:** conserva todos los decimales ingresados, con coma o punto. Las actividades 533 y 534 multiplican y suman capacidades, longitudes y viajes sin redondear los subtotales. Excel, PDF, imagen y vista previa usan el mismo valor. La plantilla oficial se conserva.
+- **Excel:** los valores numéricos usan un formato que muestra su precisión completa. Si una medida supera las 15 cifras significativas que puede conservar Excel, se escribe como texto literal para preservar sus cifras. Los cálculos normales de acarreo siguen teniendo fórmulas editables sin ROUND. Cuando sus entradas exceden la precisión numérica de Excel, se conserva el resultado exacto como valor literal y no se deja una fórmula que lo sustituya por una aproximación.
+- **Historial automático:** guarda el conjunto mientras trabajas, incluso si está incompleto o todavía no lo descargaste. Antes de crear otro conjunto se espera la confirmación del guardado del anterior. Si el historial falla, se conserva el formulario actual y se informa el error.
+- **Consultar y descargar:** pulsa Historial de reportes, busca por fecha, camino, actividad, inspector u observaciones y usa Consultar, Excel, PDF o Imagen. La consulta y descarga no sustituyen el reporte actual. Cada entrada conserva todas sus continuaciones y una copia del catálogo utilizado.
+- **Abrir para editar:** primero se conserva el trabajo actual; luego se abre el conjunto elegido. El botón Nuevo conjunto de reportes conserva el anterior y comienza uno con el catálogo de la versión instalada.
+- **Respaldo:** Descargar respaldo crea un JSON con todos los conjuntos y sus catálogos. Importar respaldo los recupera sin borrar el trabajo actual ni sustituir registros diferentes: conserva ambos como entradas separadas. Se pueden eliminar entradas antiguas del historial; el conjunto actual se conserva.
+- **Alcance:** el historial está en el mismo dispositivo, navegador y sitio. No se envía a un servidor ni se sincroniza entre equipos. Guarda el respaldo fuera del navegador para recuperarlo si se borran los datos del sitio o cambias de dispositivo. Esta actualización incorpora el borrador que aún exista; los reportes antiguos ya perdidos y sin respaldo no pueden reconstruirse automáticamente.
+
 
 La versión **0.10.6** permite registrar el traslado en horas decimales, tanto para personal como para equipo: **0,25 h = 15 minutos**, **0,5 h = 30 minutos** y **0,75 h = 45 minutos**. Acepta coma o punto, conserva los enteros y permite vacío o 0 cuando no hay traslado. La cantidad se suma al total y se exporta como número en Excel, PDF e imagen.
 
@@ -29,7 +40,7 @@ La versión **0.7.2** usa el PDF original recibido el 14/10/2026 para el reverso
 
 El Número de reporte se calcula automáticamente para las continuaciones. Incluye páginas de términos de uso y privacidad. Mantiene H.T., TRAS., los acarreos 533, el personal y sus horas, los cierres con Última línea, materiales, observaciones y las cédulas actualizadas.
 
-Para actualizar el sitio de GitHub Pages, reemplaza **toda la carpeta pwa** del repositorio con ésta, conservando su nombre y ubicación. No subas el ZIP cerrado. Cuando se publique la actualización, abre el sitio con conexión, cierra todas sus pestañas y ventanas y vuelve a abrirlo. Confirma **Versión 0.10.6**. Conserva los datos del navegador: el dato guardado en Boleta en 0.7.0 pasa al Número de reporte y los demás campos se recuperan.
+Para actualizar el sitio de GitHub Pages, reemplaza **toda la carpeta pwa** del repositorio con ésta, conservando su nombre y ubicación. No subas el ZIP cerrado. Cuando se publique la actualización, abre el sitio con conexión, cierra todas sus pestañas y ventanas y vuelve a abrirlo. Confirma **Versión 0.11.0**. Conserva los datos del navegador: el dato guardado en Boleta en 0.7.0 pasa al Número de reporte y los demás campos se recuperan.
 
 **Número de reporte** se completa automáticamente, por ejemplo **1 / 2**. Se traslada a AD3, en la casilla Número del membrete, en Excel y en la misma ubicación en PDF e imagen. **Boleta queda vacía**. La numeración no se modifica manualmente.
 

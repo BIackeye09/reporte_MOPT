@@ -62,3 +62,6 @@ textarea[aria-invalid=true]{border-color:#ba4427}
 
 /* Navegación independiente del contenido impreso de la plantilla. */
 .navegacion-reportes{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}.navegacion-reportes select{flex:1;min-width:8rem}.navegacion-reportes button{flex:0 1 auto}
+
+/* Historial local con los mismos controles del formulario, también en móvil. */
+.historial summary{font-size:1.2rem;font-weight:700;cursor:pointer}.historial[open] summary{margin-bottom:1rem}.acciones-historial{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}.acciones-historial button{margin-top:0}.historial .registro h3{font-size:1rem;overflow-wrap:anywhere}.consulta-historial{width:min(850px,calc(100% - 2rem));max-width:none;max-height:90dvh;overflow:auto}.consulta-historial canvas{width:100%;height:auto;display:block;margin-top:1rem}.consulta-historial .titulo-calendario{flex-wrap:wrap}

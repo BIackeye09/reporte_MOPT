@@ -1,12 +1,13 @@
+import {decimalVisible} from './decimales.mjs';
 import {codigoEquipoVisible,equipoDelReporte} from './core.mjs';
 import {esAcarreo,agregarAcarreo,actualizarAcarreo,retirarAcarreo,acarreoDe,codigoParticipante,
-  numeroViajes,subtotalAcarreo,totalAcarreos,erroresAcarreos,VIAJES_MAXIMOS} from './acarreos-reglas.mjs';
+  numeroViajes,subtotalExactoAcarreo,totalExactoAcarreos,erroresAcarreos,VIAJES_MAXIMOS} from './acarreos-reglas.mjs';
 
 export function iniciarAcarreos(catalogos,{leer,actualizar}) {
   const $=id=>document.getElementById(id),panel=$('acarreos'),lista=$('acarreos-reporte');
   const selector=$('equipo-acarreo'),agregar=$('agregar-acarreo');
   const tarjetas=new Map();let firma='';
-  const cantidad=n=>n===null?'Sin completar':n.toFixed(2).replace('.',',');
+  const cantidad=n=>n===null?'Sin completar':decimalVisible(n);
   function tarjeta(id) {
     const equipo=equipoDelReporte(leer(),id,catalogos),r=acarreoDe(leer(),id);
     const article=document.createElement('article');article.className='registro registro-acarreo';article.dataset.id=id;
@@ -83,7 +84,7 @@ export function iniciarAcarreos(catalogos,{leer,actualizar}) {
     const errores=erroresAcarreos(b);
     for(const {id} of seleccionados) {
       const t=tarjetas.get(id),r=acarreoDe(b,id),e=errores[id]??{};
-      t.cod.value=codigoParticipante(r)||'Sin completar';t.total.value=cantidad(subtotalAcarreo(r));t.contador.textContent=numeroViajes(r)+' de 12 viajes marcados';
+      t.cod.value=codigoParticipante(r)||'Sin completar';t.total.value=cantidad(subtotalExactoAcarreo(r));t.contador.textContent=numeroViajes(r)+' de 12 viajes marcados';
       t.errorTotal.textContent=e.grupo??e.total??'';
       for(const [k,control] of Object.entries(t.controles)){
         if(document.activeElement!==control)control.value=r[k];
@@ -93,7 +94,7 @@ export function iniciarAcarreos(catalogos,{leer,actualizar}) {
       t.grupos.codigoParticipante.hidden=!['800','900'].includes(r.participante);
       t.alquiler.checked=r.alquilado;t.checks.forEach((c,i)=>c.checked=r.viajes[i]);
     }
-    const total=totalAcarreos(b);$('total-acarreos').value=cantidad(total);
+    const total=totalExactoAcarreos(b);$('total-acarreos').value=cantidad(total);
     $('nota-produccion-acarreos').textContent=total===null?'Completa las capacidades y las longitudes de todos los equipos agregados.':'Este total se coloca automáticamente en Producción, al frente.';
     $('error-acarreos').textContent=Object.keys(errores).length?Object.values(Object.values(errores)[0])[0]:'';
   }

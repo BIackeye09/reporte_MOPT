@@ -37,8 +37,10 @@ test('El Excel refuerza sólo los trazos existentes y conserva colores, fuentes 
   const trazos=xml=>[...xml.matchAll(/<(left|right|top|bottom|diagonal)\b([^>]*)>/g)].map(([,lado,attrs])=>[lado,/\bstyle=/.test(attrs)]);
   assert.deepEqual(trazos(despues),trazos(antes));
   assert.deepEqual(despues.match(/<color\b[^>]*\/>/g),antes.match(/<color\b[^>]*\/>/g));
-  for(const n of ['fonts','fills','cellStyleXfs','cellStyles','numFmts'])
+  for(const n of ['fonts','fills','cellStyleXfs','cellStyles'])
     assert.equal(seccion(h['xl/styles.xml'],n),seccion(original['xl/styles.xml'],n),n);
+  // Producción añade su formato de precisión; conserva los formatos originales.
+  for(const formato of seccion(original['xl/styles.xml'],'numFmts').match(/<numFmt\b[^>]*\/>/g))assert.ok(h['xl/styles.xml'].includes(formato));
   assert.ok(h['xl/styles.xml'].includes(seccion(original['xl/styles.xml'],'cellXfs').replace(/^<cellXfs[^>]*>|<\/cellXfs>$/g,'')));
 });
 test('Todas las filas de Personal y Equipo mantienen su borde horizontal, con cierre y casillas vacías',()=>{

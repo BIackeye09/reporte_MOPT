@@ -1,6 +1,8 @@
+import {decimalLiteral,decimalParaExcel,admiteNumeroExcel} from './decimales.mjs';
+import {formatoProduccionExcel} from './precision-excel.mjs';
 import {personalDelReporte,equipoDelReporte,datosPersonalManual,datosEquipoManual,nuevoIdManual,leerManuales} from './registros.mjs';
 export {personalDelReporte,equipoDelReporte,erroresPersonalManual,erroresEquipoManual} from './registros.mjs';
-import {esAcarreo,acarreoDe,codigoParticipante,totalAcarreos,erroresAcarreos,registroAcarreoValido} from './acarreos-reglas.mjs';
+import {esAcarreo,acarreoDe,codigoParticipante,totalAcarreos,totalExactoAcarreos,filasAcarreos,subtotalExactoAcarreo,erroresAcarreos,registroAcarreoValido} from './acarreos-reglas.mjs';
 import {valoresReversoExcel,prepararFilaReverso,formatoReversoExcel,formulaProduccionAcarreo} from './excel-acarreos.mjs';
 import {corregirImpresionXml,reforzarBordesExcel} from './impresion-excel.mjs';
 import {erroresEstacionamientos,senasInicioDelReporte,avanceDelReporte,estacionamientosAnteriores,formulaAvanceExcel} from './estacionamientos.mjs';
@@ -148,6 +150,7 @@ export function errorNumeroReporte(texto='') {
   if(!texto.trim())return 'El número de reporte es obligatorio. Escríbelo con el formato 1 / 2.';
   return !numeroReporteVisible(texto)?'Escribe dos números enteros separados por /, por ejemplo 1 / 2.':'';
 }
+export const produccionExactaDelReporte = b => esAcarreo(b)?totalExactoAcarreos(b):decimalLiteral(b.produccionTexto);
 export const produccionDelReporte = b => esAcarreo(b)?totalAcarreos(b):decimal(b.produccionTexto);
 export const unidadProduccion = (b,catalogos) => esAcarreo(b)?'M³/KM':catalogos.actividades.get(b.codigoActividad)?.unidad??'—';
 export const partEquipo = (b,id) => esAcarreo(b)?codigoParticipante(acarreoDe(b,id)):PART_MOPT;
@@ -442,6 +445,10 @@ export function rellenarXml(xml, valores) {
     if (!re.test(xml)) throw new Error(`Falta la celda ${ref} en la plantilla.`);
     xml=xml.replace(re,(_,attrs)=>{
       attrs=attrs.replace(/\s+t="[^"]*"/g,'').replace(/\/$/,'');
+      if(valor&&typeof valor.decimalExacto==='string') {
+        if(decimalLiteral(valor.decimalExacto)===null)throw new Error('Medida decimal inválida.');
+        return '<c'+attrs+'>'+(valor.formula?'<f>'+escapeXml(valor.formula)+'</f>':'')+'<v>'+valor.decimalExacto+'</v></c>';
+      }
       if(valor&&typeof valor==='object'&&typeof valor.formula==='string') {
         const vacio=valor.valor==null||valor.valor==='',texto=typeof valor.valor==='string';
         return '<c'+attrs+(vacio||texto?' t="str"':'')+'><f>'+escapeXml(valor.formula)+'</f>'+
@@ -492,7 +499,9 @@ export function generarArchivosExcel(plantilla,b,catalogos,estilosPrevios=null) 
     const fila=FILAS_EQUIPOS[i],rango='AE'+fila+',AG'+fila;
     valores['AH'+fila]={formula:'IF(COUNT('+rango+')=0,"",SUM('+rango+'))',valor:totalHorasEquipo(horasDeEquipo(b,id))};
   }
-  if(esAcarreo(b))valores.AD11={formula:formulaProduccionAcarreo(),valor:totalAcarreos(b)};
+  const produccionExacta=produccionExactaDelReporte(b);
+  const recalculable=!esAcarreo(b)||filasAcarreos(b).every(({registro:r})=>admiteNumeroExcel(r.capacidadTexto)&&admiteNumeroExcel(subtotalExactoAcarreo(r)));
+  valores.AD11=decimalParaExcel(produccionExacta,esAcarreo(b)&&recalculable?formulaProduccionAcarreo():null);
   const archivos=plantilla.map(f=>{
     const bytes=f.nombre==='xl/styles.xml'&&estilosPrevios?estilosPrevios:Uint8Array.from(atob(f.base64),c=>c.charCodeAt(0));
     if(!/^xl\/worksheets\/sheet\d+\.xml$/.test(f.nombre))return {nombre:f.nombre,bytes};
@@ -534,6 +543,7 @@ export function generarArchivosExcel(plantilla,b,catalogos,estilosPrevios=null) 
     hoja.bytes=utf8(resultado.hoja);estilos.bytes=utf8(resultado.estilos);
   }
   if(esAcarreo(b))formatoReversoExcel(archivos,utf8,b);
+  formatoProduccionExcel(archivos,utf8,produccionExacta);
   // PAG. es una respuesta SI/NO; la lista también se ofrece al editar Excel.
   const frentePago=archivos.find(f=>f.nombre==='xl/worksheets/sheet1.xml');
   let xmlPago=new TextDecoder().decode(frentePago.bytes);

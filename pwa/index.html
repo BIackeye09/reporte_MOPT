@@ -16,7 +16,7 @@
 </head>
 <body>
   <header class="cabecera">
-    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.10.6</span></p></div></div>
+    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.11.0</span></p></div></div>
     <button id="instalar" type="button" class="claro" hidden>Instalar aplicación</button>
   </header>
   <main>
@@ -52,7 +52,7 @@
         <div id="lista-actividad" class="opciones" role="listbox" aria-label="Actividades encontradas" hidden></div><p class="error" id="error-actividad"></p>
         <div class="automatico"><span>Descripción</span><p id="descripcion">Selecciona una actividad</p></div>
         <label for="produccion">Producción</label><div class="cantidad"><input id="produccion" inputmode="decimal" placeholder="" disabled aria-describedby="ayuda-produccion error-produccion"><output id="unidad" aria-live="polite">—</output></div><p class="error" id="error-produccion"></p>
-        <small id="ayuda-produccion">La unidad se completa con la actividad. La cantidad se escribe manualmente y puede quedar vacía.</small>
+        <small id="ayuda-produccion">La unidad se completa con la actividad. La cantidad se escribe manualmente y conserva todos sus decimales. Puede quedar vacía.</small>
       </section>
       <section class="tarjeta"><div class="titulo"><span>04</span><h2>Datos adicionales</h2></div>
         <fieldset id="datos-estacionamientos"><legend>Señas de inicio</legend>
@@ -117,16 +117,33 @@
       </section>
       <section class="tarjeta"><div class="titulo"><span>10</span><h2>Guardar y exportar</h2></div>
         <p class="ayuda">Se exportan el encabezado, el personal, los equipos, sus horas, los materiales y las observaciones. El reporte siempre incluye el frente y el reverso. Las horas se completan debajo de cada perfil. Para las actividades 533 y 534, los acarreos completan el reverso y calculan la producción del frente.</p>
-        <div class="acciones"><button id="guardar" type="button" disabled>Guardar borrador</button><button id="ver" type="button" class="secundario" disabled>Vista previa</button><button id="catalogos" type="button" class="secundario" disabled>Consultar catálogos</button><button id="nuevo" type="button" class="enlace" disabled>Nuevo conjunto de reportes</button></div>
+        <div class="acciones"><button id="guardar" type="button" disabled>Guardar borrador</button><button id="ver" type="button" class="secundario" disabled>Vista previa</button><button id="catalogos" type="button" class="secundario" disabled>Consultar catálogos</button><button id="historial" type="button" class="secundario" disabled>Historial de reportes</button><button id="nuevo" type="button" class="enlace" disabled>Nuevo conjunto de reportes</button></div>
         <div class="exportaciones"><button id="excel" type="button" disabled>Descargar Excel</button><button id="pdf" type="button" disabled>Descargar PDF</button><button id="imagen" type="button" disabled>Descargar imagen</button></div>
         <small>Se descargan todos los reportes: el Excel incluye un frente y un reverso por reporte y el PDF dos páginas por reporte. Las imágenes se reúnen en un ZIP cuando hay continuaciones.</small>
       </section>
     </form>
+    <details id="historial-reportes" class="tarjeta historial">
+      <summary>Historial de reportes diarios</summary>
+      <p>Los conjuntos se guardan automáticamente en este navegador. Puedes consultar o volver a descargar uno anterior mientras completas otro.</p>
+      <small>Este historial comienza con el borrador disponible al instalar esta actualización. Usa el respaldo para trasladarlo a otro dispositivo o recuperarlo si se borran los datos del sitio.</small>
+      <label for="buscar-historial">Buscar por fecha, camino, actividad, inspector u observaciones</label>
+      <input id="buscar-historial" type="search" autocomplete="off" placeholder="Fecha, código de camino o actividad">
+      <div class="acciones-historial"><button id="actualizar-historial" type="button" class="secundario">Actualizar lista</button><button id="respaldar-historial" type="button" class="secundario">Descargar respaldo</button><button id="importar-historial" type="button" class="secundario">Importar respaldo</button></div>
+      <input id="archivo-historial" type="file" accept=".json,application/json" hidden>
+      <p id="estado-historial" class="ayuda" role="status" aria-live="polite"></p><p id="cantidad-historial" role="status"></p>
+      <div id="lista-historial" class="registros"></div><button id="mas-historial" type="button" class="secundario" hidden>Mostrar más reportes</button>
+    </details>
     <section id="vista" class="tarjeta" hidden><div class="titulo"><span>Hojas</span><h2>Vista previa del reporte</h2></div><canvas id="lienzo" width="2448" height="3168" aria-label="Frente con encabezado, personal, equipos, materiales y observaciones"></canvas><canvas id="reverso" width="2448" height="3168" aria-label="Reverso de acarreos"></canvas></section>
     <section id="visor" class="tarjeta" hidden><div class="titulo"><span>Datos</span><h2>Consultar catálogos</h2></div><div class="rejilla"><label>Catálogo<select id="tipo-catalogo"><option value="actividades">Actividades</option><option value="personal">Personal</option><option value="materiales">Materiales</option><option value="equipos">Equipos</option><option value="redVial">Red vial nacional</option><option value="puentes">Puentes</option></select></label><label>Buscar<input id="buscar-catalogo" type="search" placeholder="Código, nombre o referencia"></label></div><label>Regional o provincia<select id="region-catalogo"><option value="">Todas</option></select></label><p id="cantidad-catalogo" role="status"></p><div id="resultados-catalogo"></div><button id="mas-catalogo" type="button" class="secundario" hidden>Mostrar más</button></section>
     <details class="instalacion"><summary>Usar en el teléfono</summary><p>En Android, abre el sitio y usa «Instalar aplicación» en el navegador. En iPhone, abre el sitio en Safari, pulsa Compartir y elige «Añadir a pantalla de inicio».</p><p>Espera a que aparezca «Disponible sin conexión» antes de salir de Internet. Los borradores se guardan en este dispositivo.</p></details>
     <footer class="pie-legal"><nav aria-label="Documentos de uso y privacidad"><a href="terminos.html">Términos y condiciones de uso</a><a href="privacidad.html">Política de privacidad</a></nav><small>Unidad responsable: MOPT.</small></footer>
   </main>
+  <dialog id="consulta-historial" class="consulta-historial" aria-labelledby="titulo-consulta-historial">
+    <div class="titulo-calendario"><h2 id="titulo-consulta-historial">Consulta del reporte guardado</h2><button id="cerrar-consulta-historial" type="button" class="secundario">Cerrar</button></div>
+    <p>Vista de consulta. El reporte que estás completando permanece abierto.</p>
+    <label for="hoja-consulta-historial">Reporte del conjunto</label><select id="hoja-consulta-historial"></select>
+    <canvas id="frente-consulta-historial" width="2448" height="3168" aria-label="Frente del reporte guardado"></canvas><canvas id="atras-consulta-historial" width="2448" height="3168" aria-label="Reverso del reporte guardado"></canvas>
+  </dialog>
   <dialog id="aviso-continuacion" aria-labelledby="titulo-aviso-continuacion" aria-describedby="mensaje-continuacion">
     <h2 id="titulo-aviso-continuacion">Nuevo reporte creado</h2>
     <p id="mensaje-continuacion"></p>

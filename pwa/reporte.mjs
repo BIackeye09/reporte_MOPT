@@ -1,7 +1,8 @@
+import {decimalVisible} from './decimales.mjs';
 import {lineasTextoAcarreo,TAMANO_TEXTO_ACARREO_PDF} from './texto-acarreo.mjs';
 import {personalDelReporte,equipoDelReporte} from './registros.mjs';
-import {fechaVisible,decimal,inspectorVisible,pagoExtrasVisible,FILAS_PERSONAL,FILAS_EQUIPOS,FILAS_MATERIALES,FILAS_OBSERVACIONES,lineasObservaciones,PART_MOPT,horasDePersonal,totalHoras,horasDeEquipo,totalHorasEquipo,partEquipo,numeroReporteVisible,produccionDelReporte,unidadProduccion,filaUltimaLinea} from './core.mjs';
-import {esAcarreo,filasAcarreos,FILAS_ACARREOS,codigoParticipante,enteroAcarreo,subtotalAcarreo,capacidadVisible} from './acarreos-reglas.mjs';
+import {fechaVisible,decimal,inspectorVisible,pagoExtrasVisible,FILAS_PERSONAL,FILAS_EQUIPOS,FILAS_MATERIALES,FILAS_OBSERVACIONES,lineasObservaciones,PART_MOPT,horasDePersonal,totalHoras,horasDeEquipo,totalHorasEquipo,partEquipo,numeroReporteVisible,produccionExactaDelReporte,unidadProduccion,filaUltimaLinea} from './core.mjs';
+import {esAcarreo,filasAcarreos,FILAS_ACARREOS,codigoParticipante,enteroAcarreo,subtotalExactoAcarreo,capacidadVisible} from './acarreos-reglas.mjs';
 import {senasInicioDelReporte,avanceDelReporte} from './estacionamientos.mjs';
 // Coordenadas en puntos de la hoja carta original. Sólo se dibujan los datos.
 // El membrete, los bordes y las tablas son el fondo obtenido del XLS recibido.
@@ -44,8 +45,8 @@ export function dibujarFrente(ctx,fondo,b,catalogos,escala=4) {
     texto(d,492.89,116.9,19,5.893);texto(m,512.13,116.9,17,5.893);texto(ano,540.31,116.9,37,5.893);
   }
   if(a)texto(unidadProduccion(b,catalogos),521.895,132.1,37,7.608,true,'left');
-  const produccion=produccionDelReporte(b);
-  if(produccion!==null)texto(esAcarreo(b)?produccion.toFixed(2).replace('.',','):produccion.toFixed(2),519.59,132.1,37,8.603,true,'right');
+  const produccion=produccionExactaDelReporte(b);
+  if(produccion!==null)texto(decimalVisible(produccion),519.59,132.1,37,8.603,true,'right');
   // Estos campos empiezan vacíos. No reciben información del catálogo del camino.
   const senas=senasInicioDelReporte(b),avance=avanceDelReporte(b);
   if(senas)texto(senas,78.31,164.7,333,8.097,false,'left');
@@ -163,7 +164,7 @@ export function dibujarReverso(ctx,fondo,b,catalogos,escala=4) {
       celda(lineasTextoAcarreo(r.material,'material'),4,arriba,abajo,TAMANO_TEXTO_ACARREO_PDF,false);
       celda(enteroAcarreo(r.longitudTexto),5,arriba,abajo);
       r.viajes.forEach((v,n)=>{if(v)celda('X',6+n,arriba,abajo,7.608);});
-      const total=subtotalAcarreo(r);celda(total===null?null:total.toFixed(2).replace('.',','),18,arriba,abajo);
+      const total=subtotalExactoAcarreo(r);celda(total===null?null:decimalVisible(total),18,arriba,abajo);
     }
   }
   ctx.restore();

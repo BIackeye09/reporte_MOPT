@@ -1,3 +1,4 @@
+import {multiplicarDecimal,sumarDecimales} from './decimales.mjs';
 import {lineasTextoAcarreo,LINEAS_TEXTO_ACARREO} from './texto-acarreo.mjs';
 // Reglas del reverso. Las actividades 533 y 534 utilizan estos datos y su producción.
 export const VIAJES_MAXIMOS = 12;
@@ -57,19 +58,15 @@ export function codigoParticipante(r) {
 }
 export const grupoAcarreo = r => r.alquilado?'alquilado':r.participante==='mopt'?'mopt':'otros';
 export const numeroViajes = r => r.viajes.filter(Boolean).length;
-// Las capacidades se multiplican como decimales exactos. Cada subtotal se
-// redondea a dos decimales, igual que ROUND de la hoja Excel, antes de sumarlo.
-export function subtotalCentimos(r) {
+// Se multiplica y suma sin redondear los subtotales ni el total.
+export function subtotalExactoAcarreo(r) {
   const distancia=enteroAcarreo(r.longitudTexto);
   if(numero(r.capacidadTexto)===null||distancia===null)return null;
-  const [entero,fraccion='']=r.capacidadTexto.trim().replace(',','.').split('.');
-  const potencia=10n**BigInt(fraccion.length);
-  const producto=BigInt(entero+fraccion)*BigInt(distancia)*BigInt(numeroViajes(r))*100n;
-  const centimos=(producto+potencia/2n)/potencia;
-  return centimos<=BigInt(Number.MAX_SAFE_INTEGER)?centimos:null;
+  const t=multiplicarDecimal(r.capacidadTexto,distancia,numeroViajes(r));
+  return t!==null&&Number.isFinite(Number(t))?t:null;
 }
 export function subtotalAcarreo(r) {
-  const c=subtotalCentimos(r);return c===null?null:Number(c)/100;
+  const t=subtotalExactoAcarreo(r);return t===null?null:Number(t);
 }
 export function capacidadVisible(texto) {
   if(numero(texto)===null)return '';
@@ -84,12 +81,14 @@ export function filasAcarreos(b) {
     return {id:f.id,registro:r,grupo,fila:FILAS_ACARREOS[grupo][i]};
   });
 }
-export function totalAcarreos(b) {
+export function totalExactoAcarreos(b) {
   const filas=filasAcarreos(b);
   if(!filas.length)return null;
-  let suma=0n;
-  for(const {registro} of filas){const n=subtotalCentimos(registro);if(n===null)return null;suma+=n;}
-  return suma<=BigInt(Number.MAX_SAFE_INTEGER)?Number(suma)/100:null;
+  const t=sumarDecimales(filas.map(({registro})=>subtotalExactoAcarreo(registro)));
+  return t!==null&&Number.isFinite(Number(t))?t:null;
+}
+export function totalAcarreos(b) {
+  const t=totalExactoAcarreos(b);return t===null?null:Number(t);
 }
 // Se ajustan las palabras al espacio de tres líneas de cada celda original.
 export function lineasAcarreo(texto,ancho) {
@@ -113,7 +112,7 @@ export function erroresAcarreo(r) {
     if(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(r[campo]))e[campo]='El texto contiene un carácter que Excel no puede mostrar.';
     else if(lineasTextoAcarreo(r[campo],campo).length>LINEAS_TEXTO_ACARREO)e[campo]='Reduce el texto: esta casilla del reverso admite dos líneas en tamaño 14 sin negrita.';
   }
-  if(!e.capacidadTexto&&!e.longitudTexto&&subtotalCentimos(r)===null)e.total='El subtotal es demasiado grande para el reporte.';
+  if(!e.capacidadTexto&&!e.longitudTexto&&subtotalExactoAcarreo(r)===null)e.total='El subtotal es demasiado grande para el reporte.';
   return e;
 }
 export function erroresAcarreos(b) {

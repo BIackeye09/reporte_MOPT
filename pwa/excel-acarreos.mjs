@@ -1,6 +1,7 @@
+import {decimalParaExcel,admiteNumeroExcel} from './decimales.mjs';
 import {lineasTextoAcarreo} from './texto-acarreo.mjs';
 import {equipoDelReporte} from './registros.mjs';
-import {FILAS_ACARREOS,filasAcarreos,codigoParticipante,enteroAcarreo,subtotalAcarreo} from './acarreos-reglas.mjs';
+import {FILAS_ACARREOS,filasAcarreos,codigoParticipante,enteroAcarreo,subtotalAcarreo,subtotalExactoAcarreo} from './acarreos-reglas.mjs';
 // Se escribe sobre las celdas del documento original; no se reconstruye la hoja.
 const columnas=Array.from({length:19},(_,i)=>String.fromCharCode(65+i));
 const rangosS=Object.values(FILAS_ACARREOS).map(f=>"'AtrásRDA'!S"+f[0]+':S'+f.at(-1)).join(',');
@@ -14,19 +15,19 @@ export function valoresReversoExcel(b,catalogos,filasEquipos) {
   const valores={};
   for(const filas of Object.values(FILAS_ACARREOS))for(const fila of filas) {
     for(const columna of columnas)valores[columna+fila]='';
-    valores['S'+fila]={formula:'IF(OR(C'+fila+'="",F'+fila+'=""),"",ROUND(C'+fila+'*F'+fila+'*COUNTIFS(G'+fila+':R'+fila+',"X"),2))',valor:null};
+    valores['S'+fila]={formula:'IF(OR(C'+fila+'="",F'+fila+'=""),"",C'+fila+'*F'+fila+'*COUNTIFS(G'+fila+':R'+fila+',"X"))',valor:null};
   }
   for(const {id,registro:r,fila} of filasAcarreos(b)) {
     if(fila===undefined)throw new Error('El acarreo no cabe en el reverso.');
     const equipo=equipoDelReporte(b,id,catalogos),frente=filasEquipos[b.equipos.findIndex(f=>f.id===id)];
     valores['A'+fila]={formula:'TEXT(\'FrenteRDA\'!Z'+frente+',"000")',valor:codigoParticipante(r)};
     valores['B'+fila]={formula:'\'FrenteRDA\'!AA'+frente+'&"-"&\'FrenteRDA\'!AC'+frente,valor:equipo.codigoEquipo+'-'+equipo.numeroEquipo};
-    valores['C'+fila]=Number(r.capacidadTexto.trim().replace(',','.'));
+    valores['C'+fila]=decimalParaExcel(r.capacidadTexto);
     valores['D'+fila]=lineasTextoAcarreo(r.fuente,'fuente').join('\n');
     valores['E'+fila]=lineasTextoAcarreo(r.material,'material').join('\n');
     valores['F'+fila]=enteroAcarreo(r.longitudTexto);
     r.viajes.forEach((marcado,i)=>{valores[String.fromCharCode(71+i)+fila]=marcado?'X':'';});
-    valores['S'+fila].valor=subtotalAcarreo(r);
+    valores['S'+fila]=decimalParaExcel(subtotalExactoAcarreo(r),admiteNumeroExcel(r.capacidadTexto)?valores['S'+fila].formula:null);
   }
   return valores;
 }
@@ -50,7 +51,7 @@ export function formatoReversoExcel(archivos,utf8,b) {
   const compacto=originalFonts[17].replace(/<sz\b[^>]*\/>/,'<sz val="14"/>').replace(/<b\b[^>]*\/>/g,'');
   style=style.replace(fonts[0],'<fonts'+fonts[1].replace(/count="\d+"/,'count="'+(originalFonts.length+1)+'"')+'>'+fonts[2]+compacto+'</fonts>');
   const idFormato=Math.max(163,...Array.from(style.matchAll(/<numFmt\b[^>]*numFmtId="(\d+)"/g),m=>Number(m[1])))+1;
-  const precision=Math.max(2,...filasAcarreos(b).map(({registro:r})=>(r.capacidadTexto.trim().replace(',','.').split('.')[1]??'').length));
+  const precision=Math.min(30,Math.max(2,...filasAcarreos(b).map(({registro:r})=>(r.capacidadTexto.trim().replace(',','.').split('.')[1]??'').length)));
   const nuevoFormato='<numFmt numFmtId="'+idFormato+'" formatCode="0.00'+'#'.repeat(Math.max(8,precision-2))+'"/>';
   if(numFmts)style=style.replace(numFmts[0],'<numFmts'+numFmts[1].replace(/count="\d+"/,'count="'+(Number(numFmts[1].match(/count="(\d+)"/)[1])+1)+'"')+'>'+numFmts[2]+nuevoFormato+'</numFmts>');
   else style=style.replace(/<fonts\b/,'<numFmts count="1">'+nuevoFormato+'</numFmts><fonts');
@@ -73,7 +74,7 @@ export function formatoReversoExcel(archivos,utf8,b) {
     return xml.replace(re,(_,attrs,fin)=>'<c'+attrs.replace(/\bs="\d+"/,'s="'+mapa.get(clave)+'"')+fin);
   }
   for(const filas of Object.values(FILAS_ACARREOS))for(const fila of filas)for(const columna of columnas) {
-    const formato=columna==='C'?idFormato:columna==='F'?1:columna==='S'?2:49;
+    const formato=columna==='C'?idFormato:columna==='F'?1:columna==='S'?idFormato:49;
     hoja=ajustar(hoja,columna+fila,formato,['D','E'].includes(columna));
   }
   frente.bytes=utf8(ajustar(new TextDecoder().decode(frente.bytes),'AD11',2,false,'right'));

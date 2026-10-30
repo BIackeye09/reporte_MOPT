@@ -60,12 +60,12 @@ test('Tres vagonetas con 12 m³, 90 km y un viaje producen 3240,00 M³/KM',()=>{
   assert.equal(valoresCeldas(b,catalogos).AD11,3240);assert.equal(valoresCeldas(b,catalogos).AF11,'M³/KM');
   assert.equal(catalogos.actividades.get('533').unidad,'MK');
 });
-test('Se cuentan las casillas marcadas y se redondean subtotales como en Excel',()=>{
+test('Se cuentan las casillas marcadas y se conservan subtotales exactos sin redondear',()=>{
   const r={...nuevoAcarreo(),capacidadTexto:'12',longitudTexto:'90',viajes:Array(12).fill(false)};
   r.viajes[11]=true;assert.equal(numeroViajes(r),1);assert.equal(subtotalAcarreo(r),1080);
   r.viajes[0]=true;assert.equal(subtotalAcarreo(r),2160);r.viajes.fill(false);assert.equal(subtotalAcarreo(r),0);
-  assert.equal(subtotalAcarreo({...r,capacidadTexto:'0,005',longitudTexto:'1',viajes:[true,...Array(11).fill(false)]}),.01);
-  assert.equal(subtotalAcarreo({...r,capacidadTexto:'0,004',longitudTexto:'1',viajes:[true,...Array(11).fill(false)]}),0);
+  assert.equal(subtotalAcarreo({...r,capacidadTexto:'0,005',longitudTexto:'1',viajes:[true,...Array(11).fill(false)]}),.005);
+  assert.equal(subtotalAcarreo({...r,capacidadTexto:'0,004',longitudTexto:'1',viajes:[true,...Array(11).fill(false)]}),.004);
   for(const t of ['90,5','90.0','-1','1e2',''])assert.equal(enteroAcarreo(t),null);
   assert.equal(enteroAcarreo('0'),0);
   assert.equal(capacidadVisible('0012,500'),'12,50');assert.equal(capacidadVisible('0.125'),'0,125');assert.equal(capacidadVisible('12'),'12,00');
