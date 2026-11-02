@@ -16,10 +16,14 @@
 </head>
 <body>
   <header class="cabecera">
-    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.11.0</span></p></div></div>
+    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.11.1</span></p></div></div>
     <button id="instalar" type="button" class="claro" hidden>Instalar aplicación</button>
   </header>
   <main>
+    <div class="acciones-inicio">
+      <button id="nuevo" type="button" class="boton-nuevo" aria-describedby="nota-nuevo" disabled>Nuevo reporte</button>
+      <small id="nota-nuevo">El conjunto actual se conserva en el historial antes de crear otro.</small>
+    </div>
     <div class="estado"><p id="estado" role="status">Cargando catálogos y plantilla…</p><span id="conexion"></span></div>
     <p id="fallo" role="alert" hidden></p>
     <noscript>Activa JavaScript para utilizar el reporte.</noscript>
@@ -117,7 +121,7 @@
       </section>
       <section class="tarjeta"><div class="titulo"><span>10</span><h2>Guardar y exportar</h2></div>
         <p class="ayuda">Se exportan el encabezado, el personal, los equipos, sus horas, los materiales y las observaciones. El reporte siempre incluye el frente y el reverso. Las horas se completan debajo de cada perfil. Para las actividades 533 y 534, los acarreos completan el reverso y calculan la producción del frente.</p>
-        <div class="acciones"><button id="guardar" type="button" disabled>Guardar borrador</button><button id="ver" type="button" class="secundario" disabled>Vista previa</button><button id="catalogos" type="button" class="secundario" disabled>Consultar catálogos</button><button id="historial" type="button" class="secundario" disabled>Historial de reportes</button><button id="nuevo" type="button" class="enlace" disabled>Nuevo conjunto de reportes</button></div>
+        <div class="acciones"><button id="guardar" type="button" disabled>Guardar borrador</button><button id="ver" type="button" class="secundario" disabled>Vista previa</button><button id="catalogos" type="button" class="secundario" disabled>Consultar catálogos</button><button id="historial" type="button" class="secundario" disabled>Historial de reportes</button></div>
         <div class="exportaciones"><button id="excel" type="button" disabled>Descargar Excel</button><button id="pdf" type="button" disabled>Descargar PDF</button><button id="imagen" type="button" disabled>Descargar imagen</button></div>
         <small>Se descargan todos los reportes: el Excel incluye un frente y un reverso por reporte y el PDF dos páginas por reporte. Las imágenes se reúnen en un ZIP cuando hay continuaciones.</small>
       </section>

@@ -1,4 +1,6 @@
-# Aplicación PWA · Versión 0.11.0
+# Aplicación PWA · Versión 0.11.1
+
+La versión **0.11.1** coloca el botón **Nuevo reporte** al inicio de la página, antes del formulario, en color rojo y con texto visible también en teléfono. Al pulsarlo se conserva el conjunto actual en el historial antes de iniciar otro. El botón aparece una sola vez; conserva la confirmación y el guardado existentes.
 
 La versión **0.11.0** conserva la producción sin redondearla e incorpora el **Historial de reportes diarios** en este navegador.
 
@@ -40,7 +42,7 @@ La versión **0.7.2** usa el PDF original recibido el 14/10/2026 para el reverso
 
 El Número de reporte se calcula automáticamente para las continuaciones. Incluye páginas de términos de uso y privacidad. Mantiene H.T., TRAS., los acarreos 533, el personal y sus horas, los cierres con Última línea, materiales, observaciones y las cédulas actualizadas.
 
-Para actualizar el sitio de GitHub Pages, reemplaza **toda la carpeta pwa** del repositorio con ésta, conservando su nombre y ubicación. No subas el ZIP cerrado. Cuando se publique la actualización, abre el sitio con conexión, cierra todas sus pestañas y ventanas y vuelve a abrirlo. Confirma **Versión 0.11.0**. Conserva los datos del navegador: el dato guardado en Boleta en 0.7.0 pasa al Número de reporte y los demás campos se recuperan.
+Para actualizar el sitio de GitHub Pages, reemplaza **toda la carpeta pwa** del repositorio con ésta, conservando su nombre y ubicación. No subas el ZIP cerrado. Cuando se publique la actualización, abre el sitio con conexión, cierra todas sus pestañas y ventanas y vuelve a abrirlo. Confirma **Versión 0.11.1**. Conserva los datos del navegador: el dato guardado en Boleta en 0.7.0 pasa al Número de reporte y los demás campos se recuperan.
 
 **Número de reporte** se completa automáticamente, por ejemplo **1 / 2**. Se traslada a AD3, en la casilla Número del membrete, en Excel y en la misma ubicación en PDF e imagen. **Boleta queda vacía**. La numeración no se modifica manualmente.
 
