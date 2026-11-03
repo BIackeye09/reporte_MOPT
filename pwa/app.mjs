@@ -4,7 +4,7 @@ import {iniciarHistorial} from './historial-ui.mjs';
 import {nuevoConjunto,leerConjunto,actualizarReporte,agregarTrabajador,puedeQuitarContinuacion,quitarContinuacion,destinoParaPersonal,registrarEquipo,erroresConjunto} from './continuacion.mjs';
 import {generarExcelConjunto} from './excel-conjunto.mjs';
 import {zipGuardado} from './core.mjs';
-import {CLAVE,crearCatalogos,nuevoEncabezado,leerBorrador,fechaVisible,coincide,errores,generarExcel,PART_MOPT,lineasObservaciones,errorObservaciones,errorNumeroReporte,produccionExactaDelReporte,unidadProduccion} from './core.mjs';
+import {CLAVE,crearCatalogos,nuevoEncabezado,leerBorrador,fechaVisible,coincide,errores,generarExcel,PART_MOPT,lineasObservaciones,errorObservaciones,errorNumeroReporte,produccionExactaDelReporte,unidadProduccion,nombreDescargaReporte} from './core.mjs';
 import {esAcarreo} from './acarreos-reglas.mjs';
 import {erroresEstacionamientos,senasInicioDelReporte,avanceDelReporte} from './estacionamientos.mjs';
 import {iniciarAcarreos} from './acarreos.mjs';
@@ -172,7 +172,7 @@ async function exportar(tipo,registro=null){
     conjunto={...conjunto,activo:i};encabezado=b;cargarFormulario();validar();aviso('Revisa el reporte '+b.numeroReporteTexto+' antes de descargar el conjunto.');return;
   }
   // Una instantánea impide mezclar datos si se escribe durante una exportación.
-  const reportes=origen.reportes,nombre='Reporte_MOPT_'+origen.reportes[0].fecha+'_'+Date.now();
+  const reportes=origen.reportes,nombre=nombreDescargaReporte(origen.reportes[0]);
   exportando=true;idsAcciones.forEach(id=>$(id).disabled=true);navegacion();
   try{
     if(!registro){clearTimeout(temporizador);await guardar(true);}
@@ -194,7 +194,7 @@ async function exportar(tipo,registro=null){
           const c=document.createElement('canvas');c.width=frente.width;c.height=frente.height+atras.height;
           c.getContext('2d').drawImage(frente,0,0);c.getContext('2d').drawImage(atras,0,frente.height);
           const blob=await new Promise(resolve=>c.toBlob(resolve,'image/png'));if(!blob)throw new Error('No se pudo crear la imagen.');
-          imagenes.push({nombre:'Reporte_'+String(i+1).padStart(2,'0')+'_de_'+reportes.length+'.png',bytes:new Uint8Array(await blob.arrayBuffer())});c.width=c.height=1;
+          imagenes.push({nombre:nombre+(reportes.length>1?'_'+(i+1)+'-de-'+reportes.length:'')+'.png',bytes:new Uint8Array(await blob.arrayBuffer())});c.width=c.height=1;
         }
         frente.width=frente.height=atras.width=atras.height=1;
       }
@@ -202,7 +202,7 @@ async function exportar(tipo,registro=null){
         const {generarPdfConjunto}=await import('./pdf.mjs');
         descargar(await generarPdfConjunto(paginas,reversoOriginal),nombre+'.pdf','application/pdf');
       }else if(imagenes.length===1)descargar(imagenes[0].bytes,nombre+'.png','image/png');
-      else descargar(zipGuardado(imagenes),nombre+'_imagenes.zip','application/zip');
+      else descargar(zipGuardado(imagenes),nombre+'.zip','application/zip');
     }
     const texto='Conjunto generado: '+reportes.length+' reportes. Revisa las descargas del navegador.';aviso(texto);if(registro)historialUI.mensaje(texto);
   }catch(e){aviso('No se pudo exportar: '+e.message);if(registro)throw e;}finally{exportando=false;idsAcciones.forEach(id=>$(id).disabled=false);navegacion();}

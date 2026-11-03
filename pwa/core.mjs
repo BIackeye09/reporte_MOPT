@@ -160,6 +160,14 @@ export function filaUltimaLinea(tipo,cantidad) {
   // Se utiliza la fila física siguiente, también en los cierres 25 y 30.
   return cantidad?filas[cantidad-1]+1:22;
 }
+// El nombre usa la fecha guardada en el reporte, también desde el historial.
+// Se conserva el código del camino y no se utiliza la fecha de la descarga.
+export function nombreDescargaReporte(b) {
+  if(!b.codigoCamino||!b.codigoActividad||!fechaValida(b.fecha))throw new Error('Completa el camino, la actividad y la fecha antes de descargar.');
+  const seguro=valor=>String(valor).trim().replace(/[^0-9A-Za-z_-]/g,'-');
+  const [,mes,dia]=b.fecha.split('-');
+  return seguro(b.codigoCamino)+'_'+seguro(b.codigoActividad)+'_'+mes+'-'+dia;
+}
 export function fechaHoy(dispositivo = new Date()) {
   // Se usa la fecha local del teléfono, sin convertirla a UTC.
   return `${dispositivo.getFullYear()}-${String(dispositivo.getMonth()+1).padStart(2,'0')}-${String(dispositivo.getDate()).padStart(2,'0')}`;
