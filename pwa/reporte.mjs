@@ -45,7 +45,7 @@ export function dibujarFrente(ctx,fondo,b,catalogos,escala=4) {
     texto(d,492.89,116.9,19,5.893);texto(m,512.13,116.9,17,5.893);texto(ano,540.31,116.9,37,5.893);
   }
   if(a)texto(unidadProduccion(b,catalogos),521.895,132.1,37,7.608,true,'left');
-  const produccion=produccionExactaDelReporte(b);
+  const produccion=produccionExactaDelReporte(b,catalogos);
   if(produccion!==null)texto(decimalVisible(produccion),519.59,132.1,37,8.603,true,'right');
   // Estos campos empiezan vacíos. No reciben información del catálogo del camino.
   const senas=senasInicioDelReporte(b),avance=avanceDelReporte(b);

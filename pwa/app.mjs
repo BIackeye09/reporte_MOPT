@@ -6,6 +6,7 @@ import {generarExcelConjunto} from './excel-conjunto.mjs';
 import {zipGuardado} from './core.mjs';
 import {CLAVE,crearCatalogos,nuevoEncabezado,leerBorrador,fechaVisible,coincide,errores,generarExcel,PART_MOPT,lineasObservaciones,errorObservaciones,errorNumeroReporte,produccionExactaDelReporte,unidadProduccion,nombreDescargaReporte} from './core.mjs';
 import {esAcarreo} from './acarreos-reglas.mjs';
+import {esHorasHombre,produccionAutomatica,confirmarProduccionVacia} from './core.mjs';
 import {erroresEstacionamientos,senasInicioDelReporte,avanceDelReporte} from './estacionamientos.mjs';
 import {iniciarAcarreos} from './acarreos.mjs';
 import {dibujarFrente,dibujarReverso} from './reporte.mjs';
@@ -58,11 +59,11 @@ function actualizaAutomaticos(){
   const c=catalogos.caminos.get(encabezado.codigoCamino),a=catalogos.actividades.get(encabezado.codigoActividad);
   $('desde').textContent=c?.desde??'Selecciona un camino';$('hasta').textContent=c?.hasta??'Selecciona un camino';
   $('descripcion').textContent=a?.descripcion??'Selecciona una actividad';$('unidad').textContent=unidadProduccion(encabezado,catalogos);$('produccion').disabled=!a;
-  const acarreo=esAcarreo(encabezado),produccion=produccionExactaDelReporte(encabezado);
-  $('produccion').readOnly=acarreo;
-  if(acarreo)$('produccion').value=produccion===null?'':decimalVisible(produccion);
+  const acarreo=esAcarreo(encabezado),hh=esHorasHombre(encabezado,catalogos),automatica=produccionAutomatica(encabezado,catalogos),produccion=produccionExactaDelReporte(encabezado,catalogos);
+  $('produccion').readOnly=automatica;
+  if(automatica)$('produccion').value=produccion===null?'':decimalVisible(produccion);
   else if(document.activeElement!==$('produccion'))$('produccion').value=encabezado.produccionTexto;
-  $('ayuda-produccion').textContent=acarreo?'Se calcula automáticamente con los acarreos de la actividad '+encabezado.codigoActividad+'. Completa el panel debajo de Equipo.':'La unidad se completa con la actividad. La cantidad se escribe manualmente y conserva todos sus decimales. Puede quedar vacía.';
+  $('ayuda-produccion').textContent=hh?'Horas hombre: se suma automáticamente el TOTAL de horas del personal de este reporte (ordinarias, extras, traslado y no trabajadas). Completa sus horas debajo de cada trabajador.':acarreo?'Se calcula automáticamente con los acarreos de la actividad '+encabezado.codigoActividad+'. Completa el panel debajo de Equipo.':'La unidad se completa con la actividad. La cantidad se escribe manualmente y conserva todos sus decimales. Si queda vacía, se pide confirmación al guardar o descargar.';
   // Se conservan las estaciones al cambiar de actividad, pero nunca se
   // muestran ni se exportan con 533 o 534, tampoco desde borradores viejos.
   $('datos-estacionamientos').hidden=acarreo;$('datos-estacionamientos').disabled=acarreo;
@@ -162,6 +163,26 @@ function buscador(id,tipo){
 function pintar(){dibujarFrente($('lienzo').getContext('2d'),fondo,encabezado,catalogos);dibujarReverso($('reverso').getContext('2d'),reverso,encabezado,catalogos);}
 function validar(){const e={...erroresConjunto(conjunto,catalogos)[conjunto.activo],...selecciones.erroresPendientes(),...capturaMateriales.erroresPendientes()};for(const id of ['camino','actividad','fecha','numero','produccion','avance','estacionamiento-inicio','estacionamiento-final','problema','personal','equipos','acarreos','materiales','observaciones','inspector','encargado']){$('error-'+id).textContent=e[id]??'';$(id).setAttribute('aria-invalid',String(Boolean(e[id])));}if(Object.keys(e).length){const primero=Object.keys(e)[0];if(primero==='materiales')capturaMateriales.enfocarError();else if(primero==='personal')selecciones.enfocarError();else if(primero==='equipos')selecciones.enfocarErrorEquipo();else if(primero==='acarreos')capturaAcarreos.enfocarError();else $(primero).focus();aviso('Revisa los campos indicados.');return false;}return true;}
 function descargar(bytes,nombre,mime){const blob=new Blob([bytes],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=nombre;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);}
+function revisarProduccion(reportes,catalogosRevision,accion,registro=null){
+  const decision=confirmarProduccionVacia(reportes,catalogosRevision,accion,mensaje=>confirm(mensaje));
+  if(decision.aceptado)return true;
+  if(registro){historialUI.mensaje('Descarga cancelada. Usa Abrir para editar y completa la producción del reporte guardado.');return false;}
+  const indice=decision.indices.includes(conjunto.activo)?conjunto.activo:decision.indices[0];
+  if(indice!==conjunto.activo){
+    if(Object.keys(pendientes()).length){aviso('Acción cancelada. Confirma o cancela los datos pendientes y completa la producción del reporte '+reportes[indice].numeroReporteTexto+'.');return false;}
+    conjunto={...conjunto,activo:indice};encabezado=conjunto.reportes[indice];cargarFormulario();
+  }
+  let campo=$('produccion');
+  if(esHorasHombre(encabezado,catalogos)){
+    campo=$('personal-reporte').querySelector('.horas-personal input')??$('personal');
+    const panel=campo.closest('details');if(panel)panel.open=true;
+  }else if(esAcarreo(encabezado))campo=$('equipos');
+  campo.focus();campo.scrollIntoView({behavior:'smooth',block:'center'});aviso('Acción cancelada. Completa la producción antes de volver a guardar o descargar.');return false;
+}
+async function guardarManual(){
+  if(!revisarProduccion(conjunto.reportes,catalogos,'guardar'))return false;
+  clearTimeout(temporizador);return guardar(true);
+}
 async function exportar(tipo,registro=null){
   if(exportando){if(registro)throw new Error('Espera a que termine la descarga actual.');aviso('Espera a que termine la descarga actual.');return;}
   const origen=structuredClone(registro?registro.conjunto:conjunto),catalogosExportacion=registro?crearCatalogos(registro.catalogo):catalogos;
@@ -172,6 +193,7 @@ async function exportar(tipo,registro=null){
     if(registro)throw new Error('El reporte guardado '+b.numeroReporteTexto+' está incompleto. Ábrelo para editar y completa los campos indicados.');
     conjunto={...conjunto,activo:i};encabezado=b;cargarFormulario();validar();aviso('Revisa el reporte '+b.numeroReporteTexto+' antes de descargar el conjunto.');return;
   }
+  if(!revisarProduccion(origen.reportes,catalogosExportacion,'descargar',registro))return;
   // Una instantánea impide mezclar datos si se escribe durante una exportación.
   const reportes=origen.reportes,nombre=nombreDescargaReporte(origen.reportes[0]);
   exportando=true;idsAcciones.forEach(id=>$(id).disabled=true);navegacion();
@@ -232,7 +254,7 @@ async function iniciar(){
     if(conjunto.historialId){try{const e=await archivoHistorial.obtener(conjunto.historialId);if(e)catalogos=crearCatalogos(e.catalogo);}catch{aviso('El historial no está disponible; conserva y descarga el borrador actual.');}}
     $('camino').value=encabezado.codigoCamino??'';$('actividad').value=encabezado.codigoActividad??'';$('numero').value=encabezado.numeroReporteTexto;$('produccion').value=encabezado.produccionTexto;$('senas').value=encabezado.senasInicio;$('avance').value=encabezado.longitudTexto;$('problema').value=encabezado.problema;$('observaciones').value=encabezado.observaciones;actualizaAutomaticos();
     buscador('camino','caminos');buscador('actividad','actividades');
-    for(const [id,campo]of [['produccion','produccionTexto'],['estacionamiento-inicio','estacionamientoInicioTexto'],['estacionamiento-final','estacionamientoFinalTexto'],['problema','problema'],['observaciones','observaciones'],['inspector','inspectorTexto'],['encargado','encargadoTexto']])$(id).addEventListener('input',()=>{if(id==='produccion'&&esAcarreo(encabezado))return;encabezado[campo]=$(id).value;cambiado();});
+    for(const [id,campo]of [['produccion','produccionTexto'],['estacionamiento-inicio','estacionamientoInicioTexto'],['estacionamiento-final','estacionamientoFinalTexto'],['problema','problema'],['observaciones','observaciones'],['inspector','inspectorTexto'],['encargado','encargadoTexto']])$(id).addEventListener('input',()=>{if(id==='produccion'&&produccionAutomatica(encabezado,catalogos))return;encabezado[campo]=$(id).value;cambiado();});
     // Los dos módulos comparten el borrador; ningún selector modifica la otra lista.
     const modelo={leer:()=>encabezado,agregarTrabajador:id=>prepararTrabajador({id}),guardarTrabajadorManual:(datos,editando)=>prepararTrabajador({datos,editando}),agregarMaquina:id=>prepararEquipo({id}),guardarMaquinaManual:(datos,editando)=>prepararEquipo({datos,editando}),actualizar:b=>{
       encabezado=b;cambiado();
@@ -254,7 +276,7 @@ async function iniciar(){
     $('consulta-historial').addEventListener('close',()=>{consultaGuardada=null;for(const id of ['frente-consulta-historial','atras-consulta-historial'])$(id).width=$(id).height=1;});
     $('cerrar-aviso-continuacion').addEventListener('click',()=>$('aviso-continuacion').close());
     $('aviso-continuacion').addEventListener('close',()=>$('personal').focus());
-    $('guardar').addEventListener('click',()=>{clearTimeout(temporizador);guardar(true);});$('ver').addEventListener('click',()=>{$('vista').hidden=false;pintar();$('vista').scrollIntoView({behavior:'smooth',block:'start'});});
+    $('guardar').addEventListener('click',guardarManual);$('ver').addEventListener('click',()=>{$('vista').hidden=false;pintar();$('vista').scrollIntoView({behavior:'smooth',block:'start'});});
     for(const tipo of ['excel','pdf','imagen'])$(tipo).addEventListener('click',()=>exportar(tipo));
     $('nuevo').addEventListener('click',()=>{if(!confirm('¿Crear un conjunto nuevo? El actual quedará guardado en el historial de este navegador.'))return;cambiarDocumento(()=>nuevoConjunto());});
     $('reporte-activo').addEventListener('change',()=>cambiarHoja(Number($('reporte-activo').value)));

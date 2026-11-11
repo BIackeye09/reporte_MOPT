@@ -1,6 +1,6 @@
 // Cada versión guarda juntos el formulario, los catálogos y la plantilla.
 // Una instalación incompleta no sustituye a la versión que ya funcionaba.
-const CACHE = 'mopt-rda-0.11.3';
+const CACHE = 'mopt-rda-0.12.0';
 const ARCHIVOS = ['./','index.html','estilos.css','app.mjs','continuacion.mjs','excel-conjunto.mjs','core.mjs','reporte.mjs','decimales.mjs','precision-excel.mjs','historial.mjs','historial-ui.mjs',
   'registros.mjs','entrada-manual.mjs','texto-acarreo.mjs','impresion-excel.mjs','estacionamientos.mjs',
   'calendario.mjs','selecciones.mjs','materiales.mjs','horas.mjs','horas-equipo.mjs',

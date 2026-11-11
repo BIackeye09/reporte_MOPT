@@ -1,4 +1,12 @@
-# Aplicación PWA · Versión 0.11.3
+# Aplicación PWA · Versión 0.12.0
+
+La versión **0.12.0** incorpora estos cambios:
+
+- **Producción en hh:** reconoce la unidad sin distinguir mayúsculas. Suma automáticamente el TOTAL de horas del personal de cada reporte: ordinarias, extras, traslado y no trabajadas. Se recalcula al editar o retirar trabajadores, sin sumar horas de equipos ni de otras continuaciones. Excel, PDF, imagen y vista previa utilizan el mismo resultado. En Excel la producción también se recalcula al editar las horas; los resultados que excedan la precisión de Excel conservan el valor literal exacto.
+- **Personal y equipos independientes:** se pueden agregar más equipos que trabajadores, incluso sin personal, y retirar trabajadores sin borrar equipos ni sus horas. Se mantienen los once espacios de cada tabla y las reglas de identificadores únicos.
+- **Producción vacía:** al pulsar Guardar borrador o descargar Excel, PDF o imagen, se pide confirmar si hay reportes con producción vacía. Aceptar permite continuar; Cancelar detiene esa acción y permite completar los datos. Cero es un valor válido. Al cancelar una descarga del historial se indica usar Abrir para editar. El autoguardado y los respaldos siguen conservando borradores incompletos sin interrupciones.
+
+Después de publicar, cierra todas las ventanas de la aplicación y vuelve a abrirla con conexión. Confirma **Versión 0.12.0**, conservando los datos del navegador. Las notas de versiones anteriores se conservan debajo como referencia.
 
 La versión **0.11.3** agrega **Nombre del encargado de la cuadrilla**, opcional, junto al inspector. Se guarda en el borrador y el historial, se comparte con las continuaciones y se coloca en la línea original del encargado (U43:AG43) en Excel, así como en la vista previa, PDF e imagen. Se conserva el espacio para firmar y el rótulo de la plantilla. Los borradores anteriores abren con este campo vacío. Para actualizar, reemplaza la carpeta `pwa` en la misma ubicación, cierra todas las ventanas de la aplicación y vuelve a abrirla con conexión; confirma **Versión 0.11.3** sin borrar los datos del navegador.
 
@@ -46,7 +54,7 @@ La versión **0.7.2** usa el PDF original recibido el 14/10/2026 para el reverso
 
 El Número de reporte se calcula automáticamente para las continuaciones. Incluye páginas de términos de uso y privacidad. Mantiene H.T., TRAS., los acarreos 533, el personal y sus horas, los cierres con Última línea, materiales, observaciones y las cédulas actualizadas.
 
-Para actualizar el sitio de GitHub Pages, reemplaza **toda la carpeta pwa** del repositorio con ésta, conservando su nombre y ubicación. No subas el ZIP cerrado. Cuando se publique la actualización, abre el sitio con conexión, cierra todas sus pestañas y ventanas y vuelve a abrirlo. Confirma **Versión 0.11.3**. Conserva los datos del navegador: el dato guardado en Boleta en 0.7.0 pasa al Número de reporte y los demás campos se recuperan.
+Para actualizar el sitio de GitHub Pages, reemplaza **toda la carpeta pwa** del repositorio con ésta, conservando su nombre y ubicación. No subas el ZIP cerrado. Cuando se publique la actualización, abre el sitio con conexión, cierra todas sus pestañas y ventanas y vuelve a abrirlo. Confirma **Versión 0.12.0**. Conserva los datos del navegador: el dato guardado en Boleta en 0.7.0 pasa al Número de reporte y los demás campos se recuperan.
 
 **Número de reporte** se completa automáticamente, por ejemplo **1 / 2**. Se traslada a AD3, en la casilla Número del membrete, en Excel y en la misma ubicación en PDF e imagen. **Boleta queda vacía**. La numeración no se modifica manualmente.
 
@@ -86,7 +94,7 @@ Debajo de cada buscador abre **Agregar trabajador manualmente** o **Agregar equi
 
 Pulsa **Agregar trabajador** o **Agregar equipo** para incorporarlo a la lista y completar sus horas. **Editar datos** corrige un registro manual manteniendo su ID, horas y acarreo. **Cancelar** descarta únicamente la edición sin confirmar. Antes de descargar se pide confirmar o cancelar cualquier formulario manual pendiente. Los registros manuales se guardan en el borrador actual, se recuperan al volver a abrir la aplicación y se exportan a Excel, PDF e imagen. Crear un reporte nuevo comienza sin esos registros. Los catálogos originales se conservan y no se publican nuevos datos por ingresar un registro manual.
 
-La cantidad de equipos debe ser menor o igual a la del personal. Para retirar un trabajador cuando ambas cantidades son iguales, retira primero un equipo. La aplicación no elimina máquinas ni horas por su cuenta. Un borrador anterior que incumpla la relación se recupera completo, pero requiere corregirla antes de exportar.
+Las cantidades de personal y equipos son independientes. Cada tabla admite hasta once entradas. Retirar un trabajador conserva todos los equipos y sus horas; retirar un equipo conserva al personal. Los borradores anteriores con más equipos que trabajadores se recuperan y pueden exportarse sin alterar esas cantidades.
 
 ## Archivos principales
 

@@ -1,4 +1,4 @@
-import {decimalLiteral,decimalParaExcel,admiteNumeroExcel} from './decimales.mjs';
+import {decimalLiteral,decimalParaExcel,admiteNumeroExcel,sumarDecimales} from './decimales.mjs';
 import {formatoProduccionExcel} from './precision-excel.mjs';
 import {personalDelReporte,equipoDelReporte,datosPersonalManual,datosEquipoManual,nuevoIdManual,leerManuales} from './registros.mjs';
 export {personalDelReporte,equipoDelReporte,erroresPersonalManual,erroresEquipoManual} from './registros.mjs';
@@ -88,7 +88,6 @@ export function actualizarHorasPersonal(b,id,cambios) {
   return {...b,pagosAnteriores,horasPersonal:{...b.horasPersonal,[id]:{...horasDePersonal(b,id),...cambios}}};
 }
 export function retirarPersonal(b,id) {
-  if(b.personal.includes(id)&&b.personal.length-1<(b.equipos?.length??0))throw new Error('Retira primero un equipo: no puede haber más equipos que personal.');
   const horas={...b.horasPersonal};delete horas[id];
   const pagosAnteriores={...b.pagosAnteriores};delete pagosAnteriores[id];
   return {...b,pagosAnteriores,personal:b.personal.filter(f=>f!==id),horasPersonal:horas,personalManual:(b.personalManual??[]).filter(f=>f.id!==id)};
@@ -154,9 +153,27 @@ export function errorNumeroReporte(texto='') {
   if(!texto.trim())return 'El número de reporte es obligatorio. Escríbelo con el formato 1 / 2.';
   return !numeroReporteVisible(texto)?'Escribe dos números enteros separados por /, por ejemplo 1 / 2.':'';
 }
-export const produccionExactaDelReporte = b => esAcarreo(b)?totalExactoAcarreos(b):decimalLiteral(b.produccionTexto);
-export const produccionDelReporte = b => esAcarreo(b)?totalAcarreos(b):decimal(b.produccionTexto);
+export const esHorasHombre = (b,catalogos) => !esAcarreo(b)&&String(catalogos?.actividades.get(b.codigoActividad)?.unidad??'').trim().toLowerCase()==='hh';
+export const produccionAutomatica = (b,catalogos) => esAcarreo(b)||esHorasHombre(b,catalogos);
+// Se suman los mismos cuatro campos que forman TOTAL en cada trabajador.
+// Se utilizan los textos originales para conservar todos sus decimales.
+const textosHorasHombre=b=>(b.personal??[]).flatMap(id=>{
+  const h=horasDePersonal(b,id);
+  return ['ordinarias','extras','traslado','noTrabajadas'].map(k=>h[k]).filter(t=>t.trim());
+});
+export const horasHombreExactas = b => sumarDecimales(textosHorasHombre(b));
+export const produccionExactaDelReporte = (b,catalogos) => esAcarreo(b)?totalExactoAcarreos(b):esHorasHombre(b,catalogos)?horasHombreExactas(b):decimalLiteral(b.produccionTexto);
+export const produccionDelReporte = (b,catalogos) => esAcarreo(b)?totalAcarreos(b):esHorasHombre(b,catalogos)?decimal(horasHombreExactas(b)):decimal(b.produccionTexto);
 export const unidadProduccion = (b,catalogos) => esAcarreo(b)?'M³/KM':catalogos.actividades.get(b.codigoActividad)?.unidad??'—';
+// Cero es una producción completa. La confirmación se solicita únicamente
+// desde las acciones explícitas, nunca desde el autoguardado del borrador.
+export function confirmarProduccionVacia(reportes,catalogos,accion,confirmar) {
+  const indices=reportes.flatMap((b,i)=>(produccionAutomatica(b,catalogos)?produccionExactaDelReporte(b,catalogos)===null:!String(b.produccionTexto??'').trim())?[i]:[]);
+  if(!indices.length)return {aceptado:true,indices};
+  const nombres=indices.map(i=>reportes[i].numeroReporteTexto||String(i+1)).join(', ');
+  const mensaje='La producción está en blanco en '+(indices.length===1?'el reporte ':'los reportes ')+nombres+'.\n\nAceptar: '+accion+' sin producción.\nCancelar: volver para completarla.';
+  return {aceptado:confirmar(mensaje),indices};
+}
 export const partEquipo = (b,id) => esAcarreo(b)?codigoParticipante(acarreoDe(b,id)):PART_MOPT;
 export function filaUltimaLinea(tipo,cantidad) {
   const filas=tipo==='personal'?FILAS_PERSONAL:FILAS_EQUIPOS;
@@ -289,7 +306,6 @@ export function agregarEquipo(b,id,catalogos) {
   if (lista.length>=FILAS_EQUIPOS.length) throw new Error(`El reporte admite ${FILAS_EQUIPOS.length} equipos y reserva una fila para Última línea.`);
   if (lista.some(i=>{const f=equipoDelReporte(b,i.id,catalogos);return equipoCompleto(f)&&equipoRepetido(f,fila);}))
     throw new Error('Ya existe un equipo con ese N.º de equipo en el reporte.');
-  if(lista.length>=(b.personal?.length??0))throw new Error('Agrega primero otro trabajador: no puede haber más equipos que personal.');
   return {...b,equipos:[...lista,{id,part:PART_MOPT}],horasEquipos:{...b.horasEquipos,[id]:nuevasHorasEquipo()}};
 }
 // Crear o corregir un registro manual mantiene su ID y todas sus horas.
@@ -385,8 +401,9 @@ export function errores(b,catalogos) {
   if(observaciones)e.observaciones=observaciones;
   Object.assign(e,erroresEstacionamientos(b));
   for (const [k,id] of [['produccionTexto','produccion']]) {
-    if (!(id==='produccion'&&esAcarreo(b))&&b[k].trim() && decimal(b[k])===null) e[id]='Escribe un número igual o mayor que cero, con coma o punto decimal.';
+    if (!(id==='produccion'&&produccionAutomatica(b,catalogos))&&b[k].trim() && decimal(b[k])===null) e[id]='Escribe un número igual o mayor que cero, con coma o punto decimal.';
   }
+  if(esHorasHombre(b,catalogos)&&horasHombreExactas(b)!==null&&produccionDelReporte(b,catalogos)===null)e.produccion='El total de horas hombre es demasiado grande.';
   const personal=b.personal??[],equipos=b.equipos??[];
   if (personal.length>FILAS_PERSONAL.length) e.personal=`El reporte admite ${FILAS_PERSONAL.length} trabajadores y reserva una fila para Última línea. Retira un trabajador o divídelo en otro reporte.`;
   else if (personal.some(id=>!personalDelReporte(b,id,catalogos))) e.personal='Hay un trabajador que ya no existe en el catálogo. Retíralo y selecciona el registro correcto.';
@@ -396,7 +413,6 @@ export function errores(b,catalogos) {
     if(id)e.personal='Horas de '+personalDelReporte(b,id,catalogos).nombre+': '+Object.values(erroresHoras(horasDePersonal(b,id)))[0];
   }
   if (equipos.length>FILAS_EQUIPOS.length) e.equipos=`El reporte admite ${FILAS_EQUIPOS.length} equipos y reserva una fila para Última línea. Retira un equipo o divídelo en otro reporte.`;
-  else if (equipos.length>personal.length) e.equipos='No puede haber más equipos que personal. Agrega trabajadores o retira equipos antes de descargar.';
   else if (equipos.some(f=>!equipoCompleto(equipoDelReporte(b,f.id,catalogos)))) e.equipos='Hay un equipo sin identificadores completos del catálogo. Retíralo y selecciona otro registro.';
   else if (new Set(equipos.map(f=>identidadEquipo(equipoDelReporte(b,f.id,catalogos)))).size!==equipos.length) e.equipos='Hay un N.º de equipo repetido en el reporte.';
   else {
@@ -423,7 +439,7 @@ export function valoresCeldas(b,catalogos) {
   // Excel incluye un 29/02/1900 ficticio. Se corrigen los días anteriores.
   const serial=(Date.UTC(ano,mes-1,dia)-Date.UTC(1899,11,30))/86400000-(ano===1900&&mes<3?1:0);
   const valores={U43:encargadoVisible(b),U45:inspectorVisible(b),AD3:numeroReporteVisible(b.numeroReporteTexto??''),C10:'V',I10:c.codigo,O9:c.desde,O11:c.hasta,E13:a.codigo,J13:a.descripcion,
-    AD8:'',AD10:serial,AE10:serial,AF10:serial,AD11:produccionDelReporte(b),AF11:unidadProduccion(b,catalogos),
+    AD8:'',AD10:serial,AE10:serial,AF10:serial,AD11:produccionDelReporte(b,catalogos),AF11:unidadProduccion(b,catalogos),
     AF13:b.problema??'',D14:senasInicioDelReporte(b),AA16:avanceDelReporte(b)};
   // Cada registro de horas pertenece al ID del trabajador, no a la posición
   // que ocupa en la lista; retirar una persona no cambia las horas de otra.
@@ -513,9 +529,10 @@ export function generarArchivosExcel(plantilla,b,catalogos,estilosPrevios=null) 
     const fila=FILAS_EQUIPOS[i],rango='AE'+fila+',AG'+fila;
     valores['AH'+fila]={formula:'IF(COUNT('+rango+')=0,"",SUM('+rango+'))',valor:totalHorasEquipo(horasDeEquipo(b,id))};
   }
-  const produccionExacta=produccionExactaDelReporte(b);
-  const recalculable=!esAcarreo(b)||filasAcarreos(b).every(({registro:r})=>admiteNumeroExcel(r.capacidadTexto)&&admiteNumeroExcel(subtotalExactoAcarreo(r)));
-  valores.AD11=decimalParaExcel(produccionExacta,esAcarreo(b)&&recalculable?formulaProduccionAcarreo():null);
+  const produccionExacta=produccionExactaDelReporte(b,catalogos);
+  const recalculable=esHorasHombre(b,catalogos)?textosHorasHombre(b).every(admiteNumeroExcel):!esAcarreo(b)||filasAcarreos(b).every(({registro:r})=>admiteNumeroExcel(r.capacidadTexto)&&admiteNumeroExcel(subtotalExactoAcarreo(r)));
+  const formula=esHorasHombre(b,catalogos)?'IF(COUNT(R22:S32,U22:V32)=0,"",SUM(R22:S32,U22:V32))':esAcarreo(b)?formulaProduccionAcarreo():null;
+  valores.AD11=decimalParaExcel(produccionExacta,recalculable?formula:null);
   const archivos=plantilla.map(f=>{
     const bytes=f.nombre==='xl/styles.xml'&&estilosPrevios?estilosPrevios:Uint8Array.from(atob(f.base64),c=>c.charCodeAt(0));
     if(!/^xl\/worksheets\/sheet\d+\.xml$/.test(f.nombre))return {nombre:f.nombre,bytes};

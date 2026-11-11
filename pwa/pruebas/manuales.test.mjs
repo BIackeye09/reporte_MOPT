@@ -24,13 +24,15 @@ test('El número de reporte obligatorio también bloquea la exportación directa
   const b={...ejemplo(),numeroReporteTexto:'  '};assert.match(errores(b,catalogos).numero,/obligatorio/);
   assert.throws(()=>generarExcel(plantilla,b,catalogos));assert.equal(leerBorrador(JSON.stringify(b)).numeroReporteTexto,'  ');
 });
-test('Equipo no puede superar al personal y retirarlo exige conservar esa relación',()=>{
-  const f=datos.equipos.find(equipoCompleto);assert.throws(()=>agregarEquipo(ejemplo(),f.id,catalogos),/más equipos que personal/);
+test('Equipo y personal son independientes, también al recuperar borradores anteriores',()=>{
+  const f=datos.equipos.find(equipoCompleto);const soloEquipo=agregarEquipo(ejemplo(),f.id,catalogos);
+  assert.equal(soloEquipo.personal.length,0);assert.equal(soloEquipo.equipos.length,1);assert.deepEqual(errores(soloEquipo,catalogos),{});
   let b=agregarPersonal(ejemplo(),datos.personal[0].id,catalogos);b=agregarEquipo(b,f.id,catalogos);
-  assert.throws(()=>retirarPersonal(b,b.personal[0]),/Retira primero un equipo/);assert.equal(b.personal.length,1);assert.equal(b.equipos.length,1);
+  b=actualizarHorasEquipo(b,f.id,{trabajadas:'8'});const retirado=retirarPersonal(b,b.personal[0]);
+  assert.equal(retirado.personal.length,0);assert.deepEqual(retirado.equipos,b.equipos);assert.deepEqual(retirado.horasEquipos,b.horasEquipos);
   const sinEquipo=retirarEquipo(b,f.id);assert.equal(retirarPersonal(sinEquipo,sinEquipo.personal[0]).personal.length,0);
   const viejo={...b,version:9,personal:[]};const recuperado=leerBorrador(JSON.stringify(viejo));
-  assert.equal(recuperado.equipos.length,1);assert.match(errores(recuperado,catalogos).equipos,/más equipos que personal/);assert.throws(()=>generarExcel(plantilla,recuperado,catalogos));
+  assert.equal(recuperado.equipos.length,1);assert.deepEqual(errores(recuperado,catalogos),{});assert.doesNotThrow(()=>generarExcel(plantilla,recuperado,catalogos));
 });
 test('Los manuales normalizan cédula y códigos, conservan ceros y no cambian el catálogo',()=>{
   const antes=JSON.stringify(datos),b=conManuales(),p=b.personal[0],e=b.equipos[0].id;

@@ -16,7 +16,7 @@
 </head>
 <body>
   <header class="cabecera">
-    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.11.3</span></p></div></div>
+    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.12.0</span></p></div></div>
     <button id="instalar" type="button" class="claro" hidden>Instalar aplicación</button>
   </header>
   <main>
@@ -56,7 +56,7 @@
         <div id="lista-actividad" class="opciones" role="listbox" aria-label="Actividades encontradas" hidden></div><p class="error" id="error-actividad"></p>
         <div class="automatico"><span>Descripción</span><p id="descripcion">Selecciona una actividad</p></div>
         <label for="produccion">Producción</label><div class="cantidad"><input id="produccion" inputmode="decimal" placeholder="" disabled aria-describedby="ayuda-produccion error-produccion"><output id="unidad" aria-live="polite">—</output></div><p class="error" id="error-produccion"></p>
-        <small id="ayuda-produccion">La unidad se completa con la actividad. La cantidad se escribe manualmente y conserva todos sus decimales. Puede quedar vacía.</small>
+        <small id="ayuda-produccion">La unidad se completa con la actividad. En hh, se suma automáticamente el TOTAL de horas del personal. Las cantidades manuales pueden quedar vacías, con confirmación al guardar o descargar.</small>
       </section>
       <section class="tarjeta"><div class="titulo"><span>04</span><h2>Datos adicionales</h2></div>
         <fieldset id="datos-estacionamientos"><legend>Señas de inicio</legend>
@@ -88,7 +88,7 @@
         <div id="ficha-equipos" class="ficha" hidden><h3>Equipo seleccionado</h3><div class="rejilla"><label>Descripción<input id="descripcion-equipos" readonly></label><label>COD. (F)<input id="codigo-equipos" readonly></label><label>N.º EQ<input id="numero-equipos" readonly></label><label>Identificador del equipo<input id="identificador-equipos" readonly></label><label>PART (C)<input id="part-equipos" readonly></label></div><p id="origen-equipos" class="ayuda resultados"></p><div id="advertencias-equipos"></div></div>
         <p id="error-equipos" class="error" role="alert"></p>
         <div id="entrada-manual-equipos"></div>
-        <div class="titulo-lista"><h3>Equipos del reporte</h3><span id="cantidad-equipos">0 de 11</span></div><small>PART (C) es 000 para el MOPT. En las actividades 533 y 534 se toma el participante indicado en el acarreo.</small><small>Hay once espacios para equipos y una fila de cierre con Última línea. No puede haber más equipos que personal. Completa H.T. y TRAS. debajo de cada equipo.</small><div id="equipos-reporte" class="registros"></div>
+        <div class="titulo-lista"><h3>Equipos del reporte</h3><span id="cantidad-equipos">0 de 11</span></div><small>PART (C) es 000 para el MOPT. En las actividades 533 y 534 se toma el participante indicado en el acarreo.</small><small>Hay once espacios para equipos y una fila de cierre con Última línea. Las cantidades de personal y equipos son independientes. Completa H.T. y TRAS. debajo de cada equipo.</small><div id="equipos-reporte" class="registros"></div>
       </section>
       <section class="tarjeta" id="acarreos" tabindex="-1" hidden aria-labelledby="titulo-acarreos" aria-describedby="error-acarreos">
         <div class="titulo"><span id="codigo-acarreos">533</span><h2 id="titulo-acarreos">Acarreo de material</h2></div>
