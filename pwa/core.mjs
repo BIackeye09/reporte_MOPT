@@ -34,6 +34,10 @@ export const inspectorVisible=b=>String(b.inspectorTexto??'').trim().replace(/\s
 export function errorInspector(texto='') {
   return typeof texto!=='string'||texto.trim().length>100||/[\u0000-\u001F]/.test(texto)?'Escribe el nombre del inspector en una sola línea de hasta 100 caracteres.':'';
 }
+export const encargadoVisible=b=>String(b.encargadoTexto??'').trim().replace(/\s+/g,' ');
+export function errorEncargado(texto='') {
+  return typeof texto!=='string'||texto.trim().length>100||/[\u0000-\u001F]/.test(texto)?'Escribe el nombre del encargado de la cuadrilla en una sola línea de hasta 100 caracteres.':'';
+}
 export function errorObservaciones(texto='') {
   if(typeof texto!=='string')return 'Escribe las observaciones como texto.';
   if(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(texto))return 'Las observaciones contienen un carácter que Excel no puede mostrar. Elimínalo antes de descargar.';
@@ -306,12 +310,13 @@ export function guardarEquipoManual(b,datos,catalogos,id=null) {
 export function nuevoEncabezado() {
   const fecha=fechaHoy();
   return {version:VERSION,codigoCamino:null,codigoActividad:null,fecha,fechaTexto:fechaVisible(fecha),
-    numeroReporteTexto:'1 / 1',inspectorTexto:'',produccionTexto:'',senasInicio:'',problema:'',longitudTexto:'',estacionamientoInicioTexto:'',estacionamientoFinalTexto:'',pagosAnteriores:{},observaciones:'',personal:[],equipos:[],personalManual:[],equiposManuales:[],materiales:[],horasPersonal:{},horasEquipos:{},acarreos:{},idCatalogo:null};
+    numeroReporteTexto:'1 / 1',inspectorTexto:'',encargadoTexto:'',produccionTexto:'',senasInicio:'',problema:'',longitudTexto:'',estacionamientoInicioTexto:'',estacionamientoFinalTexto:'',pagosAnteriores:{},observaciones:'',personal:[],equipos:[],personalManual:[],equiposManuales:[],materiales:[],horasPersonal:{},horasEquipos:{},acarreos:{},idCatalogo:null};
 }
 export function leerBorrador(texto) {
   const b = JSON.parse(texto);
   if (![1,2,3,4,5,6,7,8,9,10,11,12].includes(b.version) || (b.version<4&&!fechaValida(b.fecha))) throw new Error('Borrador inválido.');
   if((b.version>=12&&typeof b.inspectorTexto!=='string')||(b.inspectorTexto!==undefined&&typeof b.inspectorTexto!=='string'))throw new Error('Borrador inválido.');
+  if(b.encargadoTexto!==undefined&&typeof b.encargadoTexto!=='string')throw new Error('Borrador inválido.');
   if(b.version>=11&&(['estacionamientoInicioTexto','estacionamientoFinalTexto'].some(k=>typeof b[k]!=='string')||
     !b.pagosAnteriores||typeof b.pagosAnteriores!=='object'||Array.isArray(b.pagosAnteriores)||Object.values(b.pagosAnteriores).some(t=>typeof t!=='string')))
     throw new Error('Borrador inválido.');
@@ -352,7 +357,7 @@ export function leerBorrador(texto) {
   if(b.version>=8&&Object.keys(b.acarreos).some(id=>!b.equipos.some(f=>f.id===id)))throw new Error('Borrador inválido.');
   const fechaTexto=b.version>=4?b.fechaTexto:fechaVisible(b.fecha);
   const personalManual=leerManuales(b,'personal'),equiposManuales=leerManuales(b,'equipos');
-  return {version:VERSION,inspectorTexto:b.inspectorTexto??'',codigoCamino:b.codigoCamino??null,codigoActividad:b.codigoActividad??null,
+  return {version:VERSION,inspectorTexto:b.inspectorTexto??'',encargadoTexto:b.encargadoTexto??'',codigoCamino:b.codigoCamino??null,codigoActividad:b.codigoActividad??null,
     // El dato escrito en Boleta en 0.7.0 pasa al Número de reporte. Se conserva
     // incluso cuando aún está incompleto, para que el usuario pueda corregirlo.
     fecha:fechaDeTexto(fechaTexto)??'',fechaTexto,numeroReporteTexto:b.version>=9?b.numeroReporteTexto:b.version===8?b.boletaTexto:'',produccionTexto:b.produccionTexto,senasInicio:b.senasInicio,
@@ -375,6 +380,7 @@ export function errores(b,catalogos) {
   const numero=errorNumeroReporte(b.numeroReporteTexto??'');if(numero)e.numero=numero;
   if (!['','S','N'].includes(b.problema??'')) e.problema='Elige Sí, No o deja el campo vacío.';
   const inspector=errorInspector(b.inspectorTexto??'');if(inspector)e.inspector=inspector;
+  const encargado=errorEncargado(b.encargadoTexto??'');if(encargado)e.encargado=encargado;
   const observaciones=errorObservaciones(b.observaciones??'');
   if(observaciones)e.observaciones=observaciones;
   Object.assign(e,erroresEstacionamientos(b));
@@ -416,7 +422,7 @@ export function valoresCeldas(b,catalogos) {
   const [ano,mes,dia]=b.fecha.split('-').map(Number);
   // Excel incluye un 29/02/1900 ficticio. Se corrigen los días anteriores.
   const serial=(Date.UTC(ano,mes-1,dia)-Date.UTC(1899,11,30))/86400000-(ano===1900&&mes<3?1:0);
-  const valores={U45:inspectorVisible(b),AD3:numeroReporteVisible(b.numeroReporteTexto??''),C10:'V',I10:c.codigo,O9:c.desde,O11:c.hasta,E13:a.codigo,J13:a.descripcion,
+  const valores={U43:encargadoVisible(b),U45:inspectorVisible(b),AD3:numeroReporteVisible(b.numeroReporteTexto??''),C10:'V',I10:c.codigo,O9:c.desde,O11:c.hasta,E13:a.codigo,J13:a.descripcion,
     AD8:'',AD10:serial,AE10:serial,AF10:serial,AD11:produccionDelReporte(b),AF11:unidadProduccion(b,catalogos),
     AF13:b.problema??'',D14:senasInicioDelReporte(b),AA16:avanceDelReporte(b)};
   // Cada registro de horas pertenece al ID del trabajador, no a la posición
@@ -531,7 +537,7 @@ export function generarArchivosExcel(plantilla,b,catalogos,estilosPrevios=null) 
       if(h[campo].trim())ajustar.push(col+fila);
     if(totalHoras(h)!==null)ajustar.push('X'+fila);
   }
-  ajustar.push('AD3','AA16','U45');
+  ajustar.push('AD3','AA16','U43','U45');
   for(const [i] of (b.equipos??[]).entries())ajustar.push(...['Z','AE','AG','AH'].map(c=>c+FILAS_EQUIPOS[i]));
   // El texto es literal, aunque empiece con =; se conserva dentro de cada
   // línea original y nunca se escribe en las casillas de firma o sello.
@@ -625,8 +631,8 @@ function ajustarAnchos(hoja,estilos,referencias,centradas=[]) {
     const hora=referencia.match(/^([RSTUVWX])(\d+)$/),enHoras=hora&&Number(hora[2])>=22&&Number(hora[2])<=33;
     const cantidad=referencia==='AA16'||referencia.startsWith('P')||(enHoras&&['R','S','U','V','X'].includes(hora[1]))||/^(AE|AG|AH)\d+$/.test(referencia);
     const codigo=(enHoras&&['T','W'].includes(hora[1]))||referencia==='AD3'||/^Z\d+$/.test(referencia);
-    // El nombre del inspector empieza a la izquierda de su casilla original.
-    const alineacion=referencia==='U45'?'left':centradas.includes(referencia)?'center':null;
+    // Los nombres empiezan a la izquierda de sus casillas originales.
+    const alineacion=['U43','U45'].includes(referencia)?'left':centradas.includes(referencia)?'center':null;
     const clave=(alineacion?'alineacion-'+alineacion+'-':cantidad?'cantidad-':codigo?'codigo-':'texto-')+id;
     if(!mapa.has(clave)) {
       let formato=originales[id];

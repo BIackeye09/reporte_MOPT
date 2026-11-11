@@ -2,7 +2,7 @@ import {nuevoEncabezado,leerBorrador,FILAS_PERSONAL,agregarPersonal,guardarPerso
 
 // Las estaciones y su diferencia son comunes. Las listas, horas, producción,
 // problema, observaciones y acarreos siguen perteneciendo a cada reporte.
-const CABECERA=Object.freeze(['codigoCamino','codigoActividad','fecha','fechaTexto','idCatalogo','inspectorTexto']);
+const CABECERA=Object.freeze(['codigoCamino','codigoActividad','fecha','fechaTexto','idCatalogo','inspectorTexto','encargadoTexto']);
 export const CAMPOS_ESTACIONES=Object.freeze(['estacionamientoInicioTexto','estacionamientoFinalTexto']);
 export const CAMPOS_COMPARTIDOS=Object.freeze([...CABECERA,...CAMPOS_ESTACIONES]);
 const compartidos=b=>Object.fromEntries(CAMPOS_COMPARTIDOS.map(k=>[k,b[k]]));

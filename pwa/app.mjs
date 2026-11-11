@@ -33,8 +33,8 @@ function navegacion(){
   $('numero').value=encabezado.numeroReporteTexto;
 }
 function cargarFormulario(){
-  for(const [id,campo] of [['camino','codigoCamino'],['actividad','codigoActividad'],['numero','numeroReporteTexto'],['produccion','produccionTexto'],['problema','problema'],['observaciones','observaciones'],['inspector','inspectorTexto']])$(id).value=encabezado[campo]??'';
-  for(const id of ['camino','actividad','fecha','numero','produccion','avance','estacionamiento-inicio','estacionamiento-final','problema','personal','equipos','acarreos','materiales','observaciones','inspector']){$('error-'+id).textContent='';$(id).removeAttribute('aria-invalid');}
+  for(const [id,campo] of [['camino','codigoCamino'],['actividad','codigoActividad'],['numero','numeroReporteTexto'],['produccion','produccionTexto'],['problema','problema'],['observaciones','observaciones'],['inspector','inspectorTexto'],['encargado','encargadoTexto']])$(id).value=encabezado[campo]??'';
+  for(const id of ['camino','actividad','fecha','numero','produccion','avance','estacionamiento-inicio','estacionamiento-final','problema','personal','equipos','acarreos','materiales','observaciones','inspector','encargado']){$('error-'+id).textContent='';$(id).removeAttribute('aria-invalid');}
   for(const id of ['camino','actividad']){$('lista-'+id).hidden=true;$(id).setAttribute('aria-expanded','false');}
   selecciones?.refrescar();capturaMateriales?.refrescar();actualizaAutomaticos();
 }
@@ -72,6 +72,7 @@ function actualizaAutomaticos(){
     $('error-'+id).textContent=erroresEst[id]??'';$(id).setAttribute('aria-invalid',String(Boolean(erroresEst[id])));
   }
   if(document.activeElement!==$('inspector'))$('inspector').value=encabezado.inspectorTexto??'';
+  if(document.activeElement!==$('encargado'))$('encargado').value=encabezado.encargadoTexto??'';
   $('senas').value=senasInicioDelReporte(encabezado);$('avance').value=avance===null?'':String(avance).replace('.',',');
   const legado=encabezado.senasInicio||encabezado.longitudTexto;
   $('datos-anteriores').hidden=!legado;
@@ -159,7 +160,7 @@ function buscador(id,tipo){
 }
 // Frente y reverso forman siempre el reporte, para cualquier actividad.
 function pintar(){dibujarFrente($('lienzo').getContext('2d'),fondo,encabezado,catalogos);dibujarReverso($('reverso').getContext('2d'),reverso,encabezado,catalogos);}
-function validar(){const e={...erroresConjunto(conjunto,catalogos)[conjunto.activo],...selecciones.erroresPendientes(),...capturaMateriales.erroresPendientes()};for(const id of ['camino','actividad','fecha','numero','produccion','avance','estacionamiento-inicio','estacionamiento-final','problema','personal','equipos','acarreos','materiales','observaciones','inspector']){$('error-'+id).textContent=e[id]??'';$(id).setAttribute('aria-invalid',String(Boolean(e[id])));}if(Object.keys(e).length){const primero=Object.keys(e)[0];if(primero==='materiales')capturaMateriales.enfocarError();else if(primero==='personal')selecciones.enfocarError();else if(primero==='equipos')selecciones.enfocarErrorEquipo();else if(primero==='acarreos')capturaAcarreos.enfocarError();else $(primero).focus();aviso('Revisa los campos indicados.');return false;}return true;}
+function validar(){const e={...erroresConjunto(conjunto,catalogos)[conjunto.activo],...selecciones.erroresPendientes(),...capturaMateriales.erroresPendientes()};for(const id of ['camino','actividad','fecha','numero','produccion','avance','estacionamiento-inicio','estacionamiento-final','problema','personal','equipos','acarreos','materiales','observaciones','inspector','encargado']){$('error-'+id).textContent=e[id]??'';$(id).setAttribute('aria-invalid',String(Boolean(e[id])));}if(Object.keys(e).length){const primero=Object.keys(e)[0];if(primero==='materiales')capturaMateriales.enfocarError();else if(primero==='personal')selecciones.enfocarError();else if(primero==='equipos')selecciones.enfocarErrorEquipo();else if(primero==='acarreos')capturaAcarreos.enfocarError();else $(primero).focus();aviso('Revisa los campos indicados.');return false;}return true;}
 function descargar(bytes,nombre,mime){const blob=new Blob([bytes],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=nombre;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);}
 async function exportar(tipo,registro=null){
   if(exportando){if(registro)throw new Error('Espera a que termine la descarga actual.');aviso('Espera a que termine la descarga actual.');return;}
@@ -231,7 +232,7 @@ async function iniciar(){
     if(conjunto.historialId){try{const e=await archivoHistorial.obtener(conjunto.historialId);if(e)catalogos=crearCatalogos(e.catalogo);}catch{aviso('El historial no está disponible; conserva y descarga el borrador actual.');}}
     $('camino').value=encabezado.codigoCamino??'';$('actividad').value=encabezado.codigoActividad??'';$('numero').value=encabezado.numeroReporteTexto;$('produccion').value=encabezado.produccionTexto;$('senas').value=encabezado.senasInicio;$('avance').value=encabezado.longitudTexto;$('problema').value=encabezado.problema;$('observaciones').value=encabezado.observaciones;actualizaAutomaticos();
     buscador('camino','caminos');buscador('actividad','actividades');
-    for(const [id,campo]of [['produccion','produccionTexto'],['estacionamiento-inicio','estacionamientoInicioTexto'],['estacionamiento-final','estacionamientoFinalTexto'],['problema','problema'],['observaciones','observaciones'],['inspector','inspectorTexto']])$(id).addEventListener('input',()=>{if(id==='produccion'&&esAcarreo(encabezado))return;encabezado[campo]=$(id).value;cambiado();});
+    for(const [id,campo]of [['produccion','produccionTexto'],['estacionamiento-inicio','estacionamientoInicioTexto'],['estacionamiento-final','estacionamientoFinalTexto'],['problema','problema'],['observaciones','observaciones'],['inspector','inspectorTexto'],['encargado','encargadoTexto']])$(id).addEventListener('input',()=>{if(id==='produccion'&&esAcarreo(encabezado))return;encabezado[campo]=$(id).value;cambiado();});
     // Los dos módulos comparten el borrador; ningún selector modifica la otra lista.
     const modelo={leer:()=>encabezado,agregarTrabajador:id=>prepararTrabajador({id}),guardarTrabajadorManual:(datos,editando)=>prepararTrabajador({datos,editando}),agregarMaquina:id=>prepararEquipo({id}),guardarMaquinaManual:(datos,editando)=>prepararEquipo({datos,editando}),actualizar:b=>{
       encabezado=b;cambiado();

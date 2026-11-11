@@ -6,7 +6,7 @@ const idValido=id=>typeof id==='string'&&/^[a-zA-Z0-9_-]{8,100}$/.test(id);
 export const nuevoIdHistorial=()=>globalThis.crypto.randomUUID?.()??'reporte-'+Date.now()+'-'+Array.from(globalThis.crypto.getRandomValues(new Uint32Array(2)),n=>n.toString(16)).join('');
 export function tieneContenido(c) {
   return c.reportes.some(b=>b.codigoCamino||b.codigoActividad||
-    ['produccionTexto','observaciones','inspectorTexto','problema','estacionamientoInicioTexto','estacionamientoFinalTexto','senasInicio','longitudTexto'].some(k=>String(b[k]??'').trim())||
+    ['produccionTexto','observaciones','inspectorTexto','encargadoTexto','problema','estacionamientoInicioTexto','estacionamientoFinalTexto','senasInicio','longitudTexto'].some(k=>String(b[k]??'').trim())||
     ['personal','equipos','materiales','personalManual','equiposManuales'].some(k=>b[k]?.length));
 }
 const conjuntoLeido=c=>leerConjunto(JSON.stringify(c));

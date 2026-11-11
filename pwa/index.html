@@ -16,7 +16,7 @@
 </head>
 <body>
   <header class="cabecera">
-    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.11.2</span></p></div></div>
+    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.11.3</span></p></div></div>
     <button id="instalar" type="button" class="claro" hidden>Instalar aplicación</button>
   </header>
   <main>
@@ -113,11 +113,14 @@
         <p id="espacio-observaciones" class="resultados" role="status">0 de 3 líneas disponibles.</p><p id="error-observaciones" class="error" role="alert"></p>
       </section>
       <section class="tarjeta" aria-labelledby="titulo-inspector">
-        <div class="titulo"><span>09</span><h2 id="titulo-inspector">Inspector</h2></div>
+        <div class="titulo"><span>09</span><h2 id="titulo-inspector">Inspector y encargado</h2></div>
         <label for="inspector">Nombre del inspector</label>
         <input id="inspector" type="text" list="inspectores" maxlength="100" autocomplete="off" placeholder="Escribe un nombre o elige una opción" aria-describedby="nota-inspector error-inspector">
         <datalist id="inspectores"><option value="Grechen Calderón"></option></datalist>
         <small id="nota-inspector">Opcional. Se comparte con los reportes del conjunto y se coloca en la línea del inspector al exportar.</small><p id="error-inspector" class="error" role="alert"></p>
+        <label for="encargado">Nombre del encargado de la cuadrilla</label>
+        <input id="encargado" type="text" maxlength="100" autocomplete="off" placeholder="Escribe el nombre del encargado" aria-describedby="nota-encargado error-encargado">
+        <small id="nota-encargado">Opcional. Se comparte con los reportes del conjunto y se coloca en la línea del encargado al exportar.</small><p id="error-encargado" class="error" role="alert"></p>
       </section>
       <section class="tarjeta"><div class="titulo"><span>10</span><h2>Guardar y exportar</h2></div>
         <p class="ayuda">Se exportan el encabezado, el personal, los equipos, sus horas, los materiales y las observaciones. El reporte siempre incluye el frente y el reverso. Las horas se completan debajo de cada perfil. Para las actividades 533 y 534, los acarreos completan el reverso y calculan la producción del frente.</p>

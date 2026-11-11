@@ -1,4 +1,6 @@
-# Aplicación PWA · Versión 0.11.2
+# Aplicación PWA · Versión 0.11.3
+
+La versión **0.11.3** agrega **Nombre del encargado de la cuadrilla**, opcional, junto al inspector. Se guarda en el borrador y el historial, se comparte con las continuaciones y se coloca en la línea original del encargado (U43:AG43) en Excel, así como en la vista previa, PDF e imagen. Se conserva el espacio para firmar y el rótulo de la plantilla. Los borradores anteriores abren con este campo vacío. Para actualizar, reemplaza la carpeta `pwa` en la misma ubicación, cierra todas las ventanas de la aplicación y vuelve a abrirla con conexión; confirma **Versión 0.11.3** sin borrar los datos del navegador.
 
 La versión **0.11.2** nombra las descargas como **NúmeroCamino_Actividad_Mes-Día**, usando la fecha del reporte y conservando los ceros del código del camino. Ejemplo: **4-0771-00_280_11-03.xlsx**. El mismo nombre base se utiliza en PDF, imagen y al descargar desde el historial. El mes y el día llevan dos dígitos. No se añade año ni marca de tiempo. Si hay continuaciones, el ZIP de imágenes usa ese mismo nombre base y sus imágenes añaden `_1-de-2`, `_2-de-2`, etc., para distinguirlas. El respaldo general del historial conserva su nombre independiente.
 
@@ -44,7 +46,7 @@ La versión **0.7.2** usa el PDF original recibido el 14/10/2026 para el reverso
 
 El Número de reporte se calcula automáticamente para las continuaciones. Incluye páginas de términos de uso y privacidad. Mantiene H.T., TRAS., los acarreos 533, el personal y sus horas, los cierres con Última línea, materiales, observaciones y las cédulas actualizadas.
 
-Para actualizar el sitio de GitHub Pages, reemplaza **toda la carpeta pwa** del repositorio con ésta, conservando su nombre y ubicación. No subas el ZIP cerrado. Cuando se publique la actualización, abre el sitio con conexión, cierra todas sus pestañas y ventanas y vuelve a abrirlo. Confirma **Versión 0.11.2**. Conserva los datos del navegador: el dato guardado en Boleta en 0.7.0 pasa al Número de reporte y los demás campos se recuperan.
+Para actualizar el sitio de GitHub Pages, reemplaza **toda la carpeta pwa** del repositorio con ésta, conservando su nombre y ubicación. No subas el ZIP cerrado. Cuando se publique la actualización, abre el sitio con conexión, cierra todas sus pestañas y ventanas y vuelve a abrirlo. Confirma **Versión 0.11.3**. Conserva los datos del navegador: el dato guardado en Boleta en 0.7.0 pasa al Número de reporte y los demás campos se recuperan.
 
 **Número de reporte** se completa automáticamente, por ejemplo **1 / 2**. Se traslada a AD3, en la casilla Número del membrete, en Excel y en la misma ubicación en PDF e imagen. **Boleta queda vacía**. La numeración no se modifica manualmente.
 

@@ -1,7 +1,7 @@
 import {decimalVisible} from './decimales.mjs';
 import {lineasTextoAcarreo,TAMANO_TEXTO_ACARREO_PDF} from './texto-acarreo.mjs';
 import {personalDelReporte,equipoDelReporte} from './registros.mjs';
-import {fechaVisible,decimal,inspectorVisible,pagoExtrasVisible,FILAS_PERSONAL,FILAS_EQUIPOS,FILAS_MATERIALES,FILAS_OBSERVACIONES,lineasObservaciones,PART_MOPT,horasDePersonal,totalHoras,horasDeEquipo,totalHorasEquipo,partEquipo,numeroReporteVisible,produccionExactaDelReporte,unidadProduccion,filaUltimaLinea} from './core.mjs';
+import {fechaVisible,decimal,inspectorVisible,encargadoVisible,pagoExtrasVisible,FILAS_PERSONAL,FILAS_EQUIPOS,FILAS_MATERIALES,FILAS_OBSERVACIONES,lineasObservaciones,PART_MOPT,horasDePersonal,totalHoras,horasDeEquipo,totalHorasEquipo,partEquipo,numeroReporteVisible,produccionExactaDelReporte,unidadProduccion,filaUltimaLinea} from './core.mjs';
 import {esAcarreo,filasAcarreos,FILAS_ACARREOS,codigoParticipante,enteroAcarreo,subtotalExactoAcarreo,capacidadVisible} from './acarreos-reglas.mjs';
 import {senasInicioDelReporte,avanceDelReporte} from './estacionamientos.mjs';
 // Coordenadas en puntos de la hoja carta original. Sólo se dibujan los datos.
@@ -129,7 +129,8 @@ export function dibujarFrente(ctx,fondo,b,catalogos,escala=4) {
   for(const [i,linea] of lineasObservaciones(b.observaciones??'').slice(0,FILAS_OBSERVACIONES.length).entries())
     texto(linea,337,basesObservaciones[i],222,7.608,false,'left','alphabetic');
   ctx.restore();
-  // Sólo se completa el nombre en la línea del inspector de la plantilla.
+  // Se completan los nombres en sus líneas originales de la plantilla.
+  texto(encargadoVisible(b),337,543,222,8.603,false,'left','alphabetic');
   texto(inspectorVisible(b),337,571,222,8.603,false,'left','alphabetic');
   ctx.restore();
 }
