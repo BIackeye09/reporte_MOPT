@@ -16,7 +16,7 @@
 </head>
 <body>
   <header class="cabecera">
-    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.12.0</span></p></div></div>
+    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.13.0</span></p></div></div>
     <button id="instalar" type="button" class="claro" hidden>Instalar aplicación</button>
   </header>
   <main>
@@ -133,8 +133,16 @@
       <summary>Historial de reportes diarios</summary>
       <p>Los conjuntos se guardan automáticamente en este navegador. Puedes consultar o volver a descargar uno anterior mientras completas otro.</p>
       <small>Este historial comienza con el borrador disponible al instalar esta actualización. Usa el respaldo para trasladarlo a otro dispositivo o recuperarlo si se borran los datos del sitio.</small>
-      <label for="buscar-historial">Buscar por fecha, camino, actividad, inspector u observaciones</label>
-      <input id="buscar-historial" type="search" autocomplete="off" placeholder="Fecha, código de camino o actividad">
+      <label for="buscar-historial">Buscar por fecha, camino, actividad, inspector, encargado u observaciones</label>
+      <input id="buscar-historial" type="search" autocomplete="off" placeholder="Ej. 17/11/2026, código de camino o nombre">
+      <div class="filtros-historial" role="group" aria-label="Filtrar y ordenar el historial">
+        <div><label for="fecha-desde-historial">Desde</label><input id="fecha-desde-historial" type="date" min="1900-01-01" max="2100-12-31" aria-describedby="ayuda-fechas-historial error-fechas-historial"></div>
+        <div><label for="fecha-hasta-historial">Hasta</label><input id="fecha-hasta-historial" type="date" min="1900-01-01" max="2100-12-31" aria-describedby="ayuda-fechas-historial error-fechas-historial"></div>
+        <div class="orden-historial"><label for="orden-historial">Ordenar por</label><select id="orden-historial"><option value="fecha-desc">Fecha más reciente</option><option value="fecha-asc">Fecha más antigua</option><option value="guardado-desc">Último guardado</option></select></div>
+        <button id="limpiar-filtros-historial" type="button" class="secundario" disabled>Limpiar filtros</button>
+      </div>
+      <small id="ayuda-fechas-historial">Se usa la fecha del reporte. Para buscar un solo día, escribe su fecha arriba o elige la misma fecha en Desde y Hasta.</small>
+      <p id="error-fechas-historial" class="error" role="alert"></p>
       <div class="acciones-historial"><button id="actualizar-historial" type="button" class="secundario">Actualizar lista</button><button id="respaldar-historial" type="button" class="secundario">Descargar respaldo</button><button id="importar-historial" type="button" class="secundario">Importar respaldo</button></div>
       <input id="archivo-historial" type="file" accept=".json,application/json" hidden>
       <p id="estado-historial" class="ayuda" role="status" aria-live="polite"></p><p id="cantidad-historial" role="status"></p>

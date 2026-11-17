@@ -65,6 +65,10 @@ textarea[aria-invalid=true]{border-color:#ba4427}
 
 /* Historial local con los mismos controles del formulario, también en móvil. */
 .historial summary{font-size:1.2rem;font-weight:700;cursor:pointer}.historial[open] summary{margin-bottom:1rem}.acciones-historial{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0}.acciones-historial button{margin-top:0}.historial .registro h3{font-size:1rem;overflow-wrap:anywhere}.consulta-historial{width:min(850px,calc(100% - 2rem));max-width:none;max-height:90dvh;overflow:auto}.consulta-historial canvas{width:100%;height:auto;display:block;margin-top:1rem}.consulta-historial .titulo-calendario{flex-wrap:wrap}
+.filtros-historial{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr) auto;gap:12px;align-items:end;margin:16px 0 0}.filtros-historial>div{min-width:0}.filtros-historial input,.filtros-historial select{min-width:0}.filtros-historial button{min-height:48px;margin:0}.grupo-fecha-historial{min-width:0}.grupo-fecha-historial>h3{background:#e8eff5;color:var(--azul);border-radius:6px;padding:10px 12px;margin:6px 0 0;font-size:15px}.grupo-fecha-historial>.registros{margin-top:10px}.historial .registro h4{font-size:1rem;font-weight:650;margin:0 0 10px;overflow-wrap:anywhere}
+@media(max-width:850px){.filtros-historial{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.filtros-historial .orden-historial{grid-column:1/-1}.filtros-historial button{grid-column:1/-1;justify-self:start}}
+@media(max-width:360px){.filtros-historial{grid-template-columns:1fr}}
 
 /* Acción de inicio visible antes del formulario, con texto claro en móvil. */
 .acciones-inicio{display:flex;flex-direction:column;align-items:flex-start;gap:7px;margin-bottom:18px}.acciones-inicio small{margin:0}.boton-nuevo{background:#b42318;border-color:#b42318;color:#fff;min-width:170px}.boton-nuevo:hover:not(:disabled){background:#991b1b;border-color:#991b1b;filter:none}
