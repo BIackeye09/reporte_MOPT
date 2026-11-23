@@ -16,7 +16,7 @@
 </head>
 <body>
   <header class="cabecera">
-    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.13.0</span></p></div></div>
+    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.13.1</span></p></div></div>
     <button id="instalar" type="button" class="claro" hidden>Instalar aplicación</button>
   </header>
   <main>
@@ -81,7 +81,7 @@
         <div class="titulo-lista"><h3>Personal del reporte</h3><span id="cantidad-personal">0 de 11</span></div><small>Hay once espacios por reporte. Al agregar otro trabajador se abre la siguiente continuación, sin modificar la plantilla.</small><div id="personal-reporte" class="registros"></div>
       </section>
       <section class="tarjeta"><div class="titulo"><span>06</span><h2>Equipo</h2></div>
-        <p class="ayuda">Escribe el código, N.º EQ o la descripción y elige una coincidencia. El equipo se agrega al reporte y se incluye al descargar el Excel, en su propia tabla. El N.º de equipo no puede repetirse en el conjunto; COD. (F) y descripción sí.</p>
+        <p class="ayuda">Escribe el código, N.º EQ o la descripción y elige una coincidencia. El equipo se agrega al reporte y se incluye al descargar el Excel, en su propia tabla. Sólo se considera duplicado si coinciden COD. (F) y N.º EQ juntos. Por ejemplo, 210-149 y 115-149 son equipos distintos.</p>
         <label for="regional-equipos">Regional del equipo</label><select id="regional-equipos"><option value="">Todas las regionales</option></select>
         <label for="equipos">Buscar equipo por código, N.º EQ o descripción</label><input id="equipos" type="search" autocomplete="off" placeholder="Código, número de equipo o descripción" role="combobox" aria-autocomplete="list" aria-controls="lista-equipos" aria-expanded="false" aria-describedby="coincidencias-equipos error-equipos">
         <p id="coincidencias-equipos" class="ayuda resultados" role="status"></p><div id="lista-equipos" class="opciones" role="listbox" aria-label="Equipos encontrados" hidden></div><button id="mas-equipos" type="button" class="enlace" hidden>Mostrar más coincidencias</button>

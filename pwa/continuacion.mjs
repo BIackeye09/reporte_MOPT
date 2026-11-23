@@ -39,7 +39,7 @@ function comprobarDuplicado(c,tipo,fila,catalogos,editando=null) {
     const id=personal?entrada:entrada.id;
     if(i===c.activo&&id===editando)continue;
     const f=resolver(b,id,catalogos);
-    if(f&&repetido(f,fila))throw new Error((personal?'Ya existe un trabajador con ese nombre o esa cédula':'Ya existe un equipo con ese N.º de equipo')+' en el reporte '+(i+1)+' / '+c.reportes.length+'.');
+    if(f&&repetido(f,fila))throw new Error((personal?'Ya existe un trabajador con ese nombre o esa cédula':'Ya existe un equipo con ese COD. (F) y N.º de equipo')+' en el reporte '+(i+1)+' / '+c.reportes.length+'.');
   }
 }
 export function destinoParaPersonal(c) {
@@ -82,7 +82,7 @@ export function erroresConjunto(c,catalogos) {
     for(const entrada of b[tipo]) {
       const f=resolver(b,personal?entrada:entrada.id,catalogos);if(!f)continue;
       const previo=vistos[tipo].find(v=>repetido(v.f,f));
-      if(previo&&!resultado[i][tipo])resultado[i][tipo]=(personal?'Nombre o cédula de personal repetidos':'N.º de equipo repetido')+' respecto al reporte '+(previo.i+1)+'. Corrige o retira el registro duplicado.';
+      if(previo&&!resultado[i][tipo])resultado[i][tipo]=(personal?'Nombre o cédula de personal repetidos':'Equipo repetido con el mismo COD. (F) y N.º de equipo')+' respecto al reporte '+(previo.i+1)+'. Corrige o retira el registro duplicado.';
       vistos[tipo].push({i,f});
     }
   }

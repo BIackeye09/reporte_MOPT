@@ -18,17 +18,19 @@ test('Nombre y cédula son únicos por separado y el código se repite incluso e
  assert.throws(()=>agregarTrabajador(c,{datos:persona(12,'Persona prueba 1'),editando:id},cat),/nombre o esa cédula/);
  assert.equal(c.reportes[1].personalManual[0].codigo,'01');assert.deepEqual(erroresConjunto(c,cat),[{},{}]);
 });
-test('Número de equipo único con COD y descripción repetibles; también al corregir manuales',()=>{
+test('La combinación COD y número es única; cada componente y la descripción pueden repetirse',()=>{
  let c=crear(12);c=registrarEquipo(c,{datos:maquina('073')},cat);c=registrarEquipo(c,{datos:maquina('074')},cat);
  const id=c.reportes[0].equipos[0].id;c=registrarEquipo(c,{datos:maquina('073'),editando:id},cat);
- assert.throws(()=>registrarEquipo(c,{datos:maquina('074','999'),editando:id},cat),/N.º de equipo/);
- c={...c,activo:1};const antes=JSON.stringify(c);assert.throws(()=>registrarEquipo(c,{datos:maquina('00073','999')},cat),/reporte 1/);assert.equal(JSON.stringify(c),antes);
+ assert.throws(()=>registrarEquipo(c,{datos:maquina('074'),editando:id},cat),/COD.*N.º de equipo/);
+ assert.doesNotThrow(()=>registrarEquipo(c,{datos:maquina('074','999'),editando:id},cat));
+ c={...c,activo:1};const antes=JSON.stringify(c);assert.throws(()=>registrarEquipo(c,{datos:maquina('00073')},cat),/reporte 1/);assert.equal(JSON.stringify(c),antes);
+ c=registrarEquipo(c,{datos:maquina('00073','999')},cat);
  c=registrarEquipo(c,{datos:maquina('075')},cat);assert.deepEqual(erroresConjunto(c,cat),[{},{}]);
 });
 test('Los controles directos y de exportación detectan duplicados de borradores antiguos',()=>{
  let b=nuevoEncabezado();b=guardarPersonalManual(b,persona(1),cat);assert.throws(()=>guardarPersonalManual(b,persona(2,'Persona prueba 1'),cat),/nombre o esa cédula/);
- b=guardarPersonalManual(b,persona(2),cat);b=guardarEquipoManual(b,maquina('073'),cat);assert.throws(()=>guardarEquipoManual(b,maquina('73','999'),cat),/N.º de equipo/);
- let c=crear(12);let segundo=guardarEquipoManual(c.reportes[1],maquina('073','999'),cat);c=registrarEquipo(c,{datos:maquina('73')},cat);c={...c,reportes:[c.reportes[0],segundo]};assert.match(erroresConjunto(c,cat)[1].equipos,/N.º de equipo repetido/);
+ b=guardarPersonalManual(b,persona(2),cat);b=guardarEquipoManual(b,maquina('073'),cat);assert.throws(()=>guardarEquipoManual(b,maquina('73'),cat),/COD.*N.º de equipo/);
+ let c=crear(12);let segundo=guardarEquipoManual(c.reportes[1],maquina('073'),cat);c=registrarEquipo(c,{datos:maquina('73')},cat);c={...c,reportes:[c.reportes[0],segundo]};assert.match(erroresConjunto(c,cat)[1].equipos,/COD.*N.º de equipo/);
 });
 test('La migración toma estaciones del primer reporte y conserva las distintas como referencia',()=>{
  let c=crear(12);c={...c,version:1,reportes:c.reportes.map((b,i)=>({...b,estacionamientoInicioTexto:i?'7':'4,5',estacionamientoFinalTexto:i?'8':'9,87'}))};const n=leerConjunto(JSON.stringify(c));assert.equal(n.version,3);assert.ok(n.reportes.every(b=>b.estacionamientoInicioTexto==='4,5'));

@@ -286,11 +286,12 @@ function identidadPersonal(f) {
   return /\d/.test(cedula)?cedula:f.id;
 }
 function identidadEquipo(f) {
-  return String(f.numeroEquipo??'').trim().replace(/^0+(?=\d)/,'');
+  const partes=['codigoEquipo','numeroEquipo'].map(campo=>String(f?.[campo]??'').trim().replace(/^0+(?=\d)/,''));
+  return partes.every(parte=>/^\d+$/.test(parte))?partes.join('-'):'';
 }
 // Nombre y cédula son únicos por separado; el código puede repetirse.
 export const personalRepetido=(a,b)=>identidadPersonal(a)===identidadPersonal(b)||Boolean(normalizar(a.nombre)&&normalizar(a.nombre)===normalizar(b.nombre));
-// El número de equipo es único aunque cambien COD. (F) o descripción.
+// Sólo se repite un equipo cuando coinciden COD. (F) y N.º de equipo.
 export const equipoRepetido=(a,b)=>Boolean(identidadEquipo(a)&&identidadEquipo(a)===identidadEquipo(b));
 export function agregarPersonal(b,id,catalogos) {
   const fila=personalDelReporte(b,id,catalogos),lista=b.personal??[];
@@ -305,7 +306,7 @@ export function agregarEquipo(b,id,catalogos) {
   if (!equipoCompleto(fila)) throw new Error('Este registro no trae un COD. (F) y un N.º EQ completos.');
   if (lista.length>=FILAS_EQUIPOS.length) throw new Error(`El reporte admite ${FILAS_EQUIPOS.length} equipos y reserva una fila para Última línea.`);
   if (lista.some(i=>{const f=equipoDelReporte(b,i.id,catalogos);return equipoCompleto(f)&&equipoRepetido(f,fila);}))
-    throw new Error('Ya existe un equipo con ese N.º de equipo en el reporte.');
+    throw new Error('Ya existe un equipo con ese COD. (F) y N.º de equipo en el reporte.');
   return {...b,equipos:[...lista,{id,part:PART_MOPT}],horasEquipos:{...b.horasEquipos,[id]:nuevasHorasEquipo()}};
 }
 // Crear o corregir un registro manual mantiene su ID y todas sus horas.
@@ -319,7 +320,7 @@ export function guardarPersonalManual(b,datos,catalogos,id=null) {
 export function guardarEquipoManual(b,datos,catalogos,id=null) {
   if(id&&!b.equiposManuales?.some(f=>f.id===id))throw new Error('El equipo manual no está en el reporte.');
   const fila=datosEquipoManual(datos,id??nuevoIdManual('equipo'));
-  if(b.equipos.some(entrada=>{const f=equipoDelReporte(b,entrada.id,catalogos);return entrada.id!==id&&f&&equipoRepetido(f,fila);}))throw new Error('Ya existe un equipo con ese N.º de equipo en el reporte.');
+  if(b.equipos.some(entrada=>{const f=equipoDelReporte(b,entrada.id,catalogos);return entrada.id!==id&&f&&equipoRepetido(f,fila);}))throw new Error('Ya existe un equipo con ese COD. (F) y N.º de equipo en el reporte.');
   const siguiente={...b,equiposManuales:[...(b.equiposManuales??[]).filter(f=>f.id!==id),fila]};
   return id?siguiente:agregarEquipo(siguiente,fila.id,catalogos);
 }
@@ -414,7 +415,7 @@ export function errores(b,catalogos) {
   }
   if (equipos.length>FILAS_EQUIPOS.length) e.equipos=`El reporte admite ${FILAS_EQUIPOS.length} equipos y reserva una fila para Última línea. Retira un equipo o divídelo en otro reporte.`;
   else if (equipos.some(f=>!equipoCompleto(equipoDelReporte(b,f.id,catalogos)))) e.equipos='Hay un equipo sin identificadores completos del catálogo. Retíralo y selecciona otro registro.';
-  else if (new Set(equipos.map(f=>identidadEquipo(equipoDelReporte(b,f.id,catalogos)))).size!==equipos.length) e.equipos='Hay un N.º de equipo repetido en el reporte.';
+  else if (new Set(equipos.map(f=>identidadEquipo(equipoDelReporte(b,f.id,catalogos)))).size!==equipos.length) e.equipos='Hay un equipo repetido con el mismo COD. (F) y N.º de equipo en el reporte.';
   else {
     const f=equipos.find(f=>Object.keys(erroresHorasEquipo(horasDeEquipo(b,f.id))).length);
     if(f)e.equipos='Horas de '+codigoEquipoVisible(equipoDelReporte(b,f.id,catalogos))+': '+Object.values(erroresHorasEquipo(horasDeEquipo(b,f.id)))[0];

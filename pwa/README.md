@@ -1,4 +1,8 @@
-# Aplicación PWA · Versión 0.13.0
+# Aplicación PWA · Versión 0.13.1
+
+La versión **0.13.1** identifica cada equipo por la combinación **COD. (F) + N.º de equipo**. El camión **210-149** y la compactadora **115-149** se pueden agregar juntos porque sus códigos son distintos. El error de duplicado aparece sólo si se repite la combinación completa, tanto al agregar o editar como al validar el reporte y sus continuaciones. Se siguen detectando combinaciones equivalentes con ceros iniciales, conservando esos ceros al mostrar y exportar los datos. La regla también se aplica al recuperar borradores y respaldos, sin modificar sus datos.
+
+Para recibir la corrección, cierra todas las ventanas de la aplicación y vuelve a abrirla con conexión. Confirma **Versión 0.13.1**, conservando los datos del navegador. Las notas anteriores permanecen debajo como referencia.
 
 La versión **0.13.0** organiza el historial por la **fecha del reporte**, con los días más recientes primero y encabezados por día. Los controles **Desde** y **Hasta** filtran un intervalo inclusivo; para un solo día también se puede escribir `17/11/2026` en la búsqueda. **Ordenar por** permite ver las fechas más antiguas primero o volver a la lista por último guardado. Los borradores sin fecha completa se muestran al final cuando se ordena por fecha, y se excluyen al filtrar un intervalo.
 
@@ -60,7 +64,7 @@ La versión **0.7.2** usa el PDF original recibido el 14/10/2026 para el reverso
 
 El Número de reporte se calcula automáticamente para las continuaciones. Incluye páginas de términos de uso y privacidad. Mantiene H.T., TRAS., los acarreos 533, el personal y sus horas, los cierres con Última línea, materiales, observaciones y las cédulas actualizadas.
 
-Para actualizar el sitio de GitHub Pages, reemplaza **toda la carpeta pwa** del repositorio con ésta, conservando su nombre y ubicación. No subas el ZIP cerrado. Cuando se publique la actualización, abre el sitio con conexión, cierra todas sus pestañas y ventanas y vuelve a abrirlo. Confirma **Versión 0.13.0**. Conserva los datos del navegador: el dato guardado en Boleta en 0.7.0 pasa al Número de reporte y los demás campos se recuperan.
+Para actualizar el sitio de GitHub Pages, reemplaza **toda la carpeta pwa** del repositorio con ésta, conservando su nombre y ubicación. No subas el ZIP cerrado. Cuando se publique la actualización, abre el sitio con conexión, cierra todas sus pestañas y ventanas y vuelve a abrirlo. Confirma **Versión 0.13.1**. Conserva los datos del navegador: el dato guardado en Boleta en 0.7.0 pasa al Número de reporte y los demás campos se recuperan.
 
 **Número de reporte** se completa automáticamente, por ejemplo **1 / 2**. Se traslada a AD3, en la casilla Número del membrete, en Excel y en la misma ubicación en PDF e imagen. **Boleta queda vacía**. La numeración no se modifica manualmente.
 
