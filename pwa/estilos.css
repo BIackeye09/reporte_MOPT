@@ -50,6 +50,7 @@ textarea[aria-invalid=true]{border-color:#ba4427}
 @media(max-width:600px){.marca{flex-wrap:wrap}.logo-mopt{width:140px}.agregar-acarreo{flex-direction:column;align-items:stretch}.agregar-acarreo button{margin-top:0}.casillas-viajes{grid-template-columns:repeat(4,minmax(0,1fr))}.registro-acarreo .registro-cabecera{flex-wrap:wrap}}
 @media(max-width:360px){.rejilla-horas-equipo{grid-template-columns:1fr}.casillas-viajes{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .pie-legal{border-top:1px solid #cbd6df;margin-top:20px;padding:20px 4px 6px}.pie-legal nav{display:flex;gap:12px 24px;flex-wrap:wrap}.pie-legal a{color:var(--azul);font-size:14px;line-height:1.5;text-underline-offset:3px}.pie-legal a:focus-visible{outline:3px solid #d79712;outline-offset:3px}.pie-legal small{margin-top:12px}
+.pie-legal .credito-autor{margin:12px 0 0;color:var(--azul);font-size:14px;line-height:1.5;overflow-wrap:anywhere}
 
 /* Ingreso manual junto al buscador, con los mismos controles del formulario. */
 .entrada-manual{margin:1rem 0;padding:1rem;border:1px solid var(--borde,#cbd5e1);border-radius:.75rem}
