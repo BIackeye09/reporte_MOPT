@@ -1,6 +1,10 @@
-# Aplicación PWA · Versión 0.13.3
+# Aplicación PWA · Versión 0.13.4
 
-La pantalla principal destaca el crédito fijo **Desarrollado por Santiago Granados Valerio** e incluye **Para: Regional Heredia V** y **Charbell Zecca Escalante**.
+La Regional V de Heredia cuenta con los Pick-Up **203-732**, **203-733**, **203-734** y **217-110** en el catálogo. Puedes encontrarlos por número de equipo o por la placa de catálogo. Las tres placas provisionales se corrigen en la ficha del equipo y se guardan en el borrador del reporte. La placa del **217-110** es fija. Los documentos oficiales identifican los equipos mediante **COD. (F)** y **N.º EQ**.
+
+Para recibir esta actualización, cierra todas las ventanas de la aplicación y vuelve a abrirla con conexión. Confirma **Versión 0.13.4**.
+
+En la versión **0.13.3**, la pantalla principal destaca el crédito fijo **Desarrollado por Santiago Granados Valerio** e incluye **Para: Regional Heredia V** y **Charbell Zecca Escalante**.
 
 Para recibir esta actualización, cierra todas las ventanas de la aplicación y vuelve a abrirla con conexión. Confirma **Versión 0.13.3**, conservando los datos del navegador.
 

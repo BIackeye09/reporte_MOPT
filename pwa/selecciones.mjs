@@ -2,6 +2,7 @@ import {iniciarEntradasManuales} from './entrada-manual.mjs';
 import {buscarPersonal,buscarEquipos,codigoEquipoVisible,agregarPersonal,agregarEquipo,retirarPersonal,retirarEquipo,partEquipo,normalizar,PART_MOPT,FILAS_PERSONAL,FILAS_EQUIPOS,personalDelReporte,equipoDelReporte} from './core.mjs';
 import {agregarMenuHoras,enfocarErrorHoras} from './horas.mjs';
 import {agregarMenuHorasEquipo,enfocarErrorHorasEquipo} from './horas-equipo.mjs';
+import {MAX_CARACTERES_PLACA,placaDelEquipo,actualizarPlacaEquipo} from './registros.mjs';
 
 // Personal y equipos se guardan en listas distintas. La posición de una lista
 // nunca asigna una máquina a la persona situada en la misma fila del documento.
@@ -10,6 +11,27 @@ export function iniciarSelecciones(catalogos,{leer,actualizar,agregarTrabajador,
   function dato(dl,nombre,valor) {
     const dt=document.createElement('dt'),dd=document.createElement('dd');
     dt.textContent=nombre;dd.textContent=valor||'Sin dato';dl.append(dt,dd);return dd;
+  }
+  function agregarCampoPlaca(tarjeta,fila) {
+    const id=fila.id,control=document.createElement('input'),label=document.createElement('label'),nota=document.createElement('small');
+    control.id='placa-'+id;control.type='text';control.maxLength=MAX_CARACTERES_PLACA;
+    control.autocomplete='off';control.autocapitalize='characters';control.placeholder=fila.placa;
+    control.value=placaDelEquipo(leer(),id,catalogos);
+    label.htmlFor=control.id;label.textContent='Placa (editable)';
+    nota.id=control.id+'-nota';
+    const provisional='Placa provisional de catálogo: '+fila.placa;
+    nota.textContent=provisional;
+    control.setAttribute('aria-describedby',nota.id);
+    control.addEventListener('input',()=>{
+      try {
+        actualizar(actualizarPlacaEquipo(leer(),id,control.value,catalogos));
+        nota.textContent=provisional;
+      }catch(error){
+        control.value=placaDelEquipo(leer(),id,catalogos);
+        nota.textContent=error.message;
+      }
+    });
+    tarjeta.append(label,control,nota);
   }
   function dibujarRegistros(tipo) {
     const filas=leer()[tipo],contenedor=$(tipo+'-reporte');contenedor.replaceChildren();
@@ -39,8 +61,11 @@ export function iniciarSelecciones(catalogos,{leer,actualizar,agregarTrabajador,
         else{dato(dl,'COD. (F)',fila.codigoEquipo);dato(dl,'N.º EQ',fila.numeroEquipo);}
         const part=dato(dl,'PART (C)',tipo==='personal'?PART_MOPT:partEquipo(leer(),id));
         if(tipo==='equipos')part.dataset.partEquipo=id;
-        dato(dl,fila.manual?'Origen':'Regional',fila.regional);tarjeta.append(dl);
+        dato(dl,fila.manual?'Origen':'Regional',fila.regional);
+        if(tipo==='equipos'&&fila.placa&&!fila.placaProvisional)dato(dl,'Placa',fila.placa);
+        tarjeta.append(dl);
       }
+      if(tipo==='equipos'&&fila?.placaProvisional)agregarCampoPlaca(tarjeta,fila);
       if(tipo==='personal'&&fila)agregarMenuHoras(tarjeta,id,{leer,actualizar});
       if(tipo==='equipos'&&fila)agregarMenuHorasEquipo(tarjeta,id,{leer,actualizar});
       contenedor.append(tarjeta);
@@ -90,6 +115,8 @@ export function iniciarSelecciones(catalogos,{leer,actualizar,agregarTrabajador,
         const titulo=document.createElement('strong'),detalle=document.createElement('small');
         titulo.textContent=tipo==='personal'?fila.nombre:codigoEquipoVisible(fila)+' · '+fila.descripcion;
         detalle.textContent=tipo==='personal'?`Cédula: ${fila.cedula} · Código: ${fila.codigo} · ${fila.regional}`:`COD. (F): ${fila.codigoEquipo||'sin dato'} · N.º EQ: ${fila.numeroEquipo||'sin dato'} · ${fila.regional}`;
+        if(tipo==='equipos'&&fila.placa)
+          detalle.textContent+=' · Placa: '+fila.placa+(fila.placaProvisional?' (provisional)':'');
         opcion.append(titulo,detalle);opcion.addEventListener('click',()=>seleccionar(fila));lista.append(opcion);
       }
       if(!coincidencias.length){const p=document.createElement('p');p.textContent='No hay coincidencias. Prueba otro dato o cambia la regional.';lista.append(p);}
@@ -112,7 +139,7 @@ export function iniciarSelecciones(catalogos,{leer,actualizar,agregarTrabajador,
         // Un código compartido conserva las coincidencias para elegir la persona
         // o máquina correcta; nunca se toma el primer resultado por suposición.
         const clave=valor=>normalizar(valor).replaceAll(' ','');
-        const campos=tipo==='personal'?['nombre','cedula','codigo']:['codigoEquipo','numeroEquipo','codigoPorComponentes','descripcion'];
+        const campos=tipo==='personal'?['nombre','cedula','codigo']:['codigoEquipo','numeroEquipo','codigoPorComponentes','placa','descripcion'];
         const exactas=coincidencias.filter(f=>campos.some(campo=>clave(f[campo]??'')===clave(input.value)));
         if(exactas.length===1)seleccionar(exactas[0]);
         else{$('coincidencias-'+tipo).textContent='Elige una coincidencia para agregar sus datos al reporte.';lista.querySelector('button')?.focus();}

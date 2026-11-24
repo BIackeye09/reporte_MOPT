@@ -2,6 +2,22 @@
 export const personalDelReporte=(b,id,catalogos)=>catalogos.personal.get(id)??b.personalManual?.find(f=>f.id===id);
 export const equipoDelReporte=(b,id,catalogos)=>catalogos.equipos.get(id)??b.equiposManuales?.find(f=>f.id===id);
 const textoValido=(t,max)=>typeof t==='string'&&t.trim().length<=max&&!/[\u0000-\u001F\u007F]/.test(t);
+export const MAX_CARACTERES_PLACA=20;
+export const placaValida=placa=>textoValido(placa,MAX_CARACTERES_PLACA);
+export function placaDelEquipo(b,id,catalogos) {
+  const fila=catalogos.equipos.get(id);
+  const placaEditada=fila?.placaProvisional?b.equipos.find(equipo=>equipo.id===id)?.placa:'';
+  return placaEditada||fila?.placa||'';
+}
+export function actualizarPlacaEquipo(b,id,placa,catalogos) {
+  const indice=b.equipos.findIndex(equipo=>equipo.id===id);
+  if(indice<0||!catalogos.equipos.get(id)?.placaProvisional)
+    throw new Error('Solo se puede editar la placa provisional de un equipo agregado.');
+  if(!placaValida(placa))throw new Error('Escribe la placa en una sola línea de hasta 20 caracteres.');
+  const equipos=[...b.equipos];
+  equipos[indice]={...equipos[indice],placa:placa.trim()};
+  return {...b,equipos};
+}
 export function erroresPersonalManual(d={}) {
   const e={};
   if(!textoValido(d.nombre,160)||!d.nombre.trim())e.nombre='Escribe el nombre y los apellidos, hasta 160 caracteres.';

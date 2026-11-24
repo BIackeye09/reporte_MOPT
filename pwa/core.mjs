@@ -1,6 +1,6 @@
 import {decimalLiteral,decimalParaExcel,admiteNumeroExcel,sumarDecimales} from './decimales.mjs';
 import {formatoProduccionExcel} from './precision-excel.mjs';
-import {personalDelReporte,equipoDelReporte,datosPersonalManual,datosEquipoManual,nuevoIdManual,leerManuales} from './registros.mjs';
+import {personalDelReporte,equipoDelReporte,datosPersonalManual,datosEquipoManual,nuevoIdManual,leerManuales,placaValida} from './registros.mjs';
 export {personalDelReporte,equipoDelReporte,erroresPersonalManual,erroresEquipoManual} from './registros.mjs';
 import {esAcarreo,acarreoDe,codigoParticipante,totalAcarreos,totalExactoAcarreos,filasAcarreos,subtotalExactoAcarreo,erroresAcarreos,registroAcarreoValido} from './acarreos-reglas.mjs';
 import {valoresReversoExcel,prepararFilaReverso,formatoReversoExcel,formulaProduccionAcarreo} from './excel-acarreos.mjs';
@@ -216,7 +216,7 @@ export function diasCalendario(ano,mes) {
   return [...Array(inicio).fill(null),...Array.from({length:cantidad},(_,i)=>
     `${ano}-${String(mes).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`)];
 }
-export function crearCatalogos(datos) {
+export function crearCatalogos(datos,equiposAdicionales=[]) {
   function indice(lista,clave='codigo') {
     const mapa = new Map();
     for (const fila of lista) {
@@ -226,6 +226,14 @@ export function crearCatalogos(datos) {
     return mapa;
   }
   if (datos.metadata?.version !== 2) throw new Error('Versión de catálogo no admitida.');
+  if(equiposAdicionales.length) {
+    const ids=new Set(datos.equipos.map(fila=>fila.id));
+    const altas=equiposAdicionales.filter(fila=>!ids.has(fila.id));
+    if(altas.length) {
+      const equipos=[...datos.equipos,...altas];
+      datos={...datos,equipos,metadata:{...datos.metadata,cantidades:{...datos.metadata.cantidades,equipos:equipos.length}}};
+    }
+  }
   // Los códigos personales y las parejas de equipo pueden repetirse por regional.
   // Se conservan todos los registros y se seleccionan mediante su ID de origen.
   return {datos,caminos:indice(datos.caminos),actividades:indice(datos.actividades),
@@ -259,9 +267,8 @@ export function codigoEquipoVisible(equipo) {
   return `${equipo.codigoEquipo||'—'}-${equipo.numeroEquipo||'—'}`;
 }
 export function buscarEquipos(catalogos,consulta,regional='') {
-  // Se busca también por los componentes reales; no se interpreta una placa.
   return buscarRegistros(catalogos.datos.equipos,consulta,regional,
-    ['codigoEquipo','numeroEquipo','codigoPorComponentes','descripcion','clasificacion']);
+    ['codigoEquipo','numeroEquipo','codigoPorComponentes','placa','descripcion','clasificacion']);
 }
 export function buscarMateriales(catalogos,consulta) {
   return buscarRegistros(catalogos.datos.materiales,consulta,'',['codigo','descripcion']);
@@ -341,7 +348,8 @@ export function leerBorrador(texto) {
   for (const k of ['codigoCamino','codigoActividad','idCatalogo']) if (b[k]!=null && typeof b[k]!=='string') throw new Error('Borrador inválido.');
   if (b.version>=4 && (typeof b.fechaTexto!=='string'||typeof b.problema!=='string'||
     !Array.isArray(b.personal)||b.personal.some(id=>typeof id!=='string')||
-    !Array.isArray(b.equipos)||b.equipos.some(f=>!f||typeof f.id!=='string'||typeof f.part!=='string')))
+    !Array.isArray(b.equipos)||b.equipos.some(f=>!f||typeof f.id!=='string'||typeof f.part!=='string'||
+      (f.placa!==undefined&&!placaValida(f.placa)))))
     throw new Error('Borrador inválido.');
   if(b.version>=5&&(!Array.isArray(b.materiales)||b.materiales.some(f=>!f||typeof f.codigo!=='string'||typeof f.cantidadTexto!=='string')))
     throw new Error('Borrador inválido.');
@@ -382,7 +390,7 @@ export function leerBorrador(texto) {
     ...(b.version>=11?{estacionamientoInicioTexto:b.estacionamientoInicioTexto,estacionamientoFinalTexto:b.estacionamientoFinalTexto}:estacionamientosAnteriores(b.senasInicio)),
     pagosAnteriores,personal:b.version>=4?b.personal:[],
     // Los borradores anteriores podían tener un PART de equipo manual.
-    equipos:b.version>=4?b.equipos.map(f=>({id:f.id,part:PART_MOPT})):[],
+    equipos:b.version>=4?b.equipos.map(f=>({id:f.id,part:PART_MOPT,...(f.placa!==undefined?{placa:f.placa.trim()}:{})})):[],
     // Los borradores anteriores se recuperan completos, con materiales vacíos.
     materiales:b.version>=5?b.materiales.map(f=>({codigo:f.codigo,cantidadTexto:f.cantidadTexto})):[],
     // Los borradores anteriores conservan sus datos y comienzan sin observaciones.

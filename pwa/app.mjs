@@ -233,7 +233,7 @@ async function exportar(tipo,registro=null){
 
 function tituloFila(tipo,f){return ({actividades:()=>f.codigo+' · '+f.descripcion,personal:()=>f.nombre+' · '+f.cedula,materiales:()=>f.codigo+' · '+f.descripcion,equipos:()=>f.codigo+' · '+f.descripcion,redVial:()=>f.seccion+' · Ruta '+f.ruta+' · '+f.descripcion,puentes:()=>f.nombre+' · Ruta '+f.ruta})[tipo]();}
 function regionFila(f){return f.regional??f.provincia??'';}
-const nombres={codigo:'Código',regional:'Regional',nombre:'Nombre',cedula:'Cédula',part:'PART (C)',unidad:'Unidad',unidadOriginal:'Unidad original',descripcion:'Descripción',codigoEquipo:'COD. (F)',numeroEquipo:'N.º EQ',codigoPorComponentes:'Código por componentes',clasificacion:'Clasificación',seccion:'Sección',ruta:'Ruta',provincia:'Provincia',longitudKm:'Longitud total (km)',tipo:'Tipo',estacion:'Estación',canton:'Cantón',numero:'Número',control:'Control',funcion:'Función',rio:'Río',longitudTexto:'Longitud original'};
+const nombres={codigo:'Código',regional:'Regional',nombre:'Nombre',cedula:'Cédula',part:'PART (C)',unidad:'Unidad',unidadOriginal:'Unidad original',descripcion:'Descripción',codigoEquipo:'COD. (F)',numeroEquipo:'N.º EQ',codigoPorComponentes:'Código por componentes',placa:'Placa',clasificacion:'Clasificación',seccion:'Sección',ruta:'Ruta',provincia:'Provincia',longitudKm:'Longitud total (km)',tipo:'Tipo',estacion:'Estación',canton:'Cantón',numero:'Número',control:'Control',funcion:'Función',rio:'Río',longitudTexto:'Longitud original'};
 function verCatalogo(cambioTipo=false){
   const tipo=$('tipo-catalogo').value,todos=catalogos.datos[tipo];
   if(cambioTipo){limite=40;$('region-catalogo').replaceChildren(new Option('Todas',''));for(const r of [...new Set(todos.map(regionFila).filter(Boolean))].sort())$('region-catalogo').add(new Option(r,r));if(['personal','equipos'].includes(tipo))$('region-catalogo').value='V Heredia';}
@@ -251,7 +251,13 @@ async function iniciar(){
     const recursos=await Promise.all([json('assets/catalogos.json'),json('assets/plantilla-excel.json'),imagen('assets/frente.png'),imagen('assets/reverso.png'),document.fonts.load('7px Reporte'),document.fonts.load('bold 7px Reporte'),archivo('assets/reverso-original.pdf')]);
     catalogos=crearCatalogos(recursos[0]);plantilla=recursos[1];fondo=recursos[2];reverso=recursos[3];reversoOriginal=recursos[6];
     let recuperado=false;try{const texto=localStorage.getItem(CLAVE);if(texto){conjunto=leerConjunto(texto);encabezado=conjunto.reportes[conjunto.activo];recuperado=true;}}catch{guardadoSeguro=false;aviso('El borrador guardado no pudo recuperarse. Se conserva hasta que pulses Guardar borrador.');}
-    if(conjunto.historialId){try{const e=await archivoHistorial.obtener(conjunto.historialId);if(e)catalogos=crearCatalogos(e.catalogo);}catch{aviso('El historial no está disponible; conserva y descarga el borrador actual.');}}
+    if(conjunto.historialId) {
+      try {
+        const e=await archivoHistorial.obtener(conjunto.historialId);
+        // Al editar un borrador anterior, se incorporan las altas con placa sin sustituir sus equipos.
+        if(e)catalogos=crearCatalogos(e.catalogo,catalogos.datos.equipos.filter(fila=>fila.placa));
+      }catch{aviso('El historial no está disponible; conserva y descarga el borrador actual.');}
+    }
     $('camino').value=encabezado.codigoCamino??'';$('actividad').value=encabezado.codigoActividad??'';$('numero').value=encabezado.numeroReporteTexto;$('produccion').value=encabezado.produccionTexto;$('senas').value=encabezado.senasInicio;$('avance').value=encabezado.longitudTexto;$('problema').value=encabezado.problema;$('observaciones').value=encabezado.observaciones;actualizaAutomaticos();
     buscador('camino','caminos');buscador('actividad','actividades');
     for(const [id,campo]of [['produccion','produccionTexto'],['estacionamiento-inicio','estacionamientoInicioTexto'],['estacionamiento-final','estacionamientoFinalTexto'],['problema','problema'],['observaciones','observaciones'],['inspector','inspectorTexto'],['encargado','encargadoTexto']])$(id).addEventListener('input',()=>{if(id==='produccion'&&produccionAutomatica(encabezado,catalogos))return;encabezado[campo]=$(id).value;cambiado();});

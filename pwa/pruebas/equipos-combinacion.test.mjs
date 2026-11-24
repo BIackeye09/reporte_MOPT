@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {crearCatalogos,nuevoEncabezado,agregarEquipo,guardarEquipoManual,actualizarHorasEquipo,equipoRepetido,errores,valoresCeldas,generarExcel,leerBorrador} from '../core.mjs';
-import {datosEquipoManual} from '../registros.mjs';
+import {buscarEquipos,crearCatalogos,nuevoEncabezado,agregarEquipo,guardarEquipoManual,actualizarHorasEquipo,equipoRepetido,errores,valoresCeldas,generarExcel,leerBorrador} from '../core.mjs';
+import {actualizarPlacaEquipo,datosEquipoManual,placaDelEquipo} from '../registros.mjs';
 import {nuevoConjunto,numerar,registrarEquipo,erroresConjunto,leerConjunto} from '../continuacion.mjs';
 import {generarExcelConjunto} from '../excel-conjunto.mjs';
 const datos=JSON.parse(fs.readFileSync(new URL('../assets/catalogos.json',import.meta.url)));
@@ -69,4 +69,38 @@ test('Los ceros iniciales no permiten duplicar una pareja ni mezclan códigos di
   assert.equal(equipoRepetido(camion,{codigoEquipo:'115',numeroEquipo:'00149'}),false);
   assert.equal(equipoRepetido(camion,{codigoEquipo:'210',numeroEquipo:'1490'}),false);
   assert.equal(equipoRepetido({numeroEquipo:'149'},camion),false);
+});
+
+test('Los cuatro Pick-Up están disponibles en Heredia por código y placa, incluso con un catálogo guardado anterior',()=>{
+  const especificaciones=[['203-732','AGV4191'],['203-733','AGV4192'],['203-734','AGV4193'],['217-110','CL389582']];
+  const altas=especificaciones.map(([codigo])=>buscarEquipos(cat,codigo,'V Heredia')[0]);
+  const ids=new Set(altas.map(fila=>fila.id));
+  const anterior={...datos,equipos:datos.equipos.filter(fila=>!ids.has(fila.id))};
+  const combinado=crearCatalogos(anterior,altas);
+  assert.equal(combinado.equipos.size,cat.equipos.size);
+  assert.equal(anterior.equipos.length,datos.equipos.length-4);
+  for(const [codigo,placa] of especificaciones){
+    const fila=buscarEquipos(combinado,placa,'V Heredia')[0];
+    assert.equal(fila.codigoPorComponentes,codigo);
+    assert.equal(fila.placa,placa);
+  }
+});
+
+test('Las tres placas provisionales se guardan por reporte y la placa fija conserva su valor',()=>{
+  const altas=['203-732','203-733','203-734','217-110'].map(codigo=>buscarEquipos(cat,codigo,'V Heredia')[0]);
+  let b=altas.reduce((reporte,fila)=>agregarEquipo(reporte,fila.id,cat),base());
+  for(const [i,fila] of altas.slice(0,3).entries())b=actualizarPlacaEquipo(b,fila.id,'AGX'+i,cat);
+  const fijo=altas[3];
+  assert.throws(()=>actualizarPlacaEquipo(b,fijo.id,'AGX3',cat),/placa provisional/);
+  assert.throws(()=>actualizarPlacaEquipo(b,camion.id,'AGX4',cat),/placa provisional/);
+  assert.throws(()=>actualizarPlacaEquipo(b,altas[0].id,'AGX\n0001',cat),/una sola línea/);
+  b=leerBorrador(JSON.stringify(b));
+  assert.deepEqual(altas.map(fila=>placaDelEquipo(b,fila.id,cat)),['AGX0','AGX1','AGX2','CL389582']);
+  assert.equal(altas[0].placa,'AGV4191');
+  assert.equal(placaDelEquipo(actualizarPlacaEquipo(b,altas[0].id,'',cat),altas[0].id,cat),'AGV4191');
+  const valores=valoresCeldas(b,cat);
+  for(const [i,fila] of altas.entries()){
+    assert.equal(valores['AA'+(22+i)],fila.codigoEquipo);
+    assert.equal(valores['AC'+(22+i)],fila.numeroEquipo);
+  }
 });
