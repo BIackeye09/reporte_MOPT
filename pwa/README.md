@@ -1,8 +1,8 @@
-# Aplicación PWA · Versión 0.13.2
+# Aplicación PWA · Versión 0.13.3
 
-La versión **0.13.2** muestra el crédito fijo **Desarrollado por Santiago Granados Valerio** en el pie de la aplicación. El crédito forma parte de la interfaz y no tiene campos ni ajustes para editarlo.
+La pantalla principal destaca el crédito fijo **Desarrollado por Santiago Granados Valerio** e incluye **Para: Regional Heredia V** y **Charbell Zecca Escalante**.
 
-Para recibir esta actualización, cierra todas las ventanas de la aplicación y vuelve a abrirla con conexión. Confirma **Versión 0.13.2**, conservando los datos del navegador.
+Para recibir esta actualización, cierra todas las ventanas de la aplicación y vuelve a abrirla con conexión. Confirma **Versión 0.13.3**, conservando los datos del navegador.
 
 La versión **0.13.1** identifica cada equipo por la combinación **COD. (F) + N.º de equipo**. El camión **210-149** y la compactadora **115-149** se pueden agregar juntos porque sus códigos son distintos. El error de duplicado aparece sólo si se repite la combinación completa, tanto al agregar o editar como al validar el reporte y sus continuaciones. Se siguen detectando combinaciones equivalentes con ceros iniciales, conservando esos ceros al mostrar y exportar los datos. La regla también se aplica al recuperar borradores y respaldos, sin modificar sus datos.
 

@@ -17,7 +17,7 @@
 </head>
 <body>
   <header class="cabecera">
-    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.13.2</span></p></div></div>
+    <div class="marca"><img class="logo-mopt" src="assets/logo.png" alt="Ministerio de Obras Públicas y Transportes" width="198" height="54"><div><h1>Reporte diario de actividad</h1><p>Heredia · Macro región V · <span id="version">Versión 0.13.3</span></p></div></div>
     <button id="instalar" type="button" class="claro" hidden>Instalar aplicación</button>
   </header>
   <main>
@@ -25,6 +25,16 @@
       <button id="nuevo" type="button" class="boton-nuevo" aria-describedby="nota-nuevo" disabled>Nuevo reporte</button>
       <small id="nota-nuevo">El conjunto actual se conserva en el historial antes de crear otro.</small>
     </div>
+    <aside class="credito-autor" aria-label="Créditos de la aplicación">
+      <p class="credito-autor-nombre">
+        <span>Desarrollado por</span>
+        <strong>Santiago Granados Valerio</strong>
+      </p>
+      <p class="credito-autor-destino">
+        <span>Para: <strong>Regional Heredia V</strong></span>
+        <span>Charbell Zecca Escalante</span>
+      </p>
+    </aside>
     <div class="estado"><p id="estado" role="status">Cargando catálogos y plantilla…</p><span id="conexion"></span></div>
     <p id="fallo" role="alert" hidden></p>
     <noscript>Activa JavaScript para utilizar el reporte.</noscript>
@@ -152,7 +162,7 @@
     <section id="vista" class="tarjeta" hidden><div class="titulo"><span>Hojas</span><h2>Vista previa del reporte</h2></div><canvas id="lienzo" width="2448" height="3168" aria-label="Frente con encabezado, personal, equipos, materiales y observaciones"></canvas><canvas id="reverso" width="2448" height="3168" aria-label="Reverso de acarreos"></canvas></section>
     <section id="visor" class="tarjeta" hidden><div class="titulo"><span>Datos</span><h2>Consultar catálogos</h2></div><div class="rejilla"><label>Catálogo<select id="tipo-catalogo"><option value="actividades">Actividades</option><option value="personal">Personal</option><option value="materiales">Materiales</option><option value="equipos">Equipos</option><option value="redVial">Red vial nacional</option><option value="puentes">Puentes</option></select></label><label>Buscar<input id="buscar-catalogo" type="search" placeholder="Código, nombre o referencia"></label></div><label>Regional o provincia<select id="region-catalogo"><option value="">Todas</option></select></label><p id="cantidad-catalogo" role="status"></p><div id="resultados-catalogo"></div><button id="mas-catalogo" type="button" class="secundario" hidden>Mostrar más</button></section>
     <details class="instalacion"><summary>Usar en el teléfono</summary><p>En Android, abre el sitio y usa «Instalar aplicación» en el navegador. En iPhone, abre el sitio en Safari, pulsa Compartir y elige «Añadir a pantalla de inicio».</p><p>Espera a que aparezca «Disponible sin conexión» antes de salir de Internet. Los borradores se guardan en este dispositivo.</p></details>
-    <footer class="pie-legal"><nav aria-label="Documentos de uso y privacidad"><a href="terminos.html">Términos y condiciones de uso</a><a href="privacidad.html">Política de privacidad</a></nav><small>Unidad responsable: MOPT.</small><p class="credito-autor">Desarrollado por <strong>Santiago Granados Valerio</strong></p></footer>
+    <footer class="pie-legal"><nav aria-label="Documentos de uso y privacidad"><a href="terminos.html">Términos y condiciones de uso</a><a href="privacidad.html">Política de privacidad</a></nav><small>Unidad responsable: MOPT.</small></footer>
   </main>
   <dialog id="consulta-historial" class="consulta-historial" aria-labelledby="titulo-consulta-historial">
     <div class="titulo-calendario"><h2 id="titulo-consulta-historial">Consulta del reporte guardado</h2><button id="cerrar-consulta-historial" type="button" class="secundario">Cerrar</button></div>

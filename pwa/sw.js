@@ -1,6 +1,6 @@
 // Cada versión guarda juntos el formulario, los catálogos y la plantilla.
 // Una instalación incompleta no sustituye a la versión que ya funcionaba.
-const CACHE = 'mopt-rda-0.13.2';
+const CACHE = 'mopt-rda-0.13.3';
 const ARCHIVOS = ['./','index.html','estilos.css','app.mjs','continuacion.mjs','excel-conjunto.mjs','core.mjs','reporte.mjs','decimales.mjs','precision-excel.mjs','historial.mjs','historial-ui.mjs','historial-filtros.mjs',
   'registros.mjs','entrada-manual.mjs','texto-acarreo.mjs','impresion-excel.mjs','estacionamientos.mjs',
   'calendario.mjs','selecciones.mjs','materiales.mjs','horas.mjs','horas-equipo.mjs',
@@ -11,7 +11,10 @@ const ARCHIVOS = ['./','index.html','estilos.css','app.mjs','continuacion.mjs','
   'assets/frente.png','assets/reverso.png','assets/reporte-normal.otf',
   'assets/reporte-negrita.otf','icons/icono-192.png','icons/icono-512.png',
   'icons/icono-180.png','icons/icono-maskable.png'];
-self.addEventListener('install',evento=>evento.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ARCHIVOS))));
+self.addEventListener('install', evento => {
+  const solicitudes = ARCHIVOS.map(archivo => new Request(archivo, { cache: 'no-cache' }));
+  evento.waitUntil(caches.open(CACHE).then(cache => cache.addAll(solicitudes)));
+});
 self.addEventListener('activate',evento=>evento.waitUntil((async()=>{
   const nombres=await caches.keys();
   await Promise.all(nombres.filter(n=>n.startsWith('mopt-rda-')&&n!==CACHE).map(n=>caches.delete(n)));
